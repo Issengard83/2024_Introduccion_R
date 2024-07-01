@@ -1,0 +1,501 @@
+---
+title: "Unión de datasets, mapas con ggplot2 y documentos RMarkdown"
+format: html
+editor: visual
+toc: true
+toc-title: "Contenidos"
+style: "../custom.scss"
+---
+
+[Este material es parte del curso **Introducción a R *tidyverse* del Instituto Nacional de Epidemiología “Dr. Juan H. Jara” - ANLIS**]{.text style="display: block; text-align: center;"}
+
+[Creado por Tamara Ricardo, licensed under [CC BY-NC 4.0](#0) ![](data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAxMy4wLjIsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDE0OTQ4KSAgLS0+DQo8IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDEuMC8vRU4iICJodHRwOi8vd3d3LnczLm9yZy9UUi8yMDAxL1JFQy1TVkctMjAwMTA5MDQvRFREL3N2ZzEwLmR0ZCI+DQo8c3ZnIHZlcnNpb249IjEuMCIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4Ig0KCSB3aWR0aD0iNjRweCIgaGVpZ2h0PSI2NHB4IiB2aWV3Qm94PSI1LjUgLTMuNSA2NCA2NCIgZW5hYmxlLWJhY2tncm91bmQ9Im5ldyA1LjUgLTMuNSA2NCA2NCIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+DQo8Zz4NCgk8Y2lyY2xlIGZpbGw9IiNGRkZGRkYiIGN4PSIzNy43ODUiIGN5PSIyOC41MDEiIHI9IjI4LjgzNiIvPg0KCTxwYXRoIGQ9Ik0zNy40NDEtMy41YzguOTUxLDAsMTYuNTcyLDMuMTI1LDIyLjg1Nyw5LjM3MmMzLjAwOCwzLjAwOSw1LjI5NSw2LjQ0OCw2Ljg1NywxMC4zMTQNCgkJYzEuNTYxLDMuODY3LDIuMzQ0LDcuOTcxLDIuMzQ0LDEyLjMxNGMwLDQuMzgxLTAuNzczLDguNDg2LTIuMzE0LDEyLjMxM2MtMS41NDMsMy44MjgtMy44Miw3LjIxLTYuODI4LDEwLjE0Mw0KCQljLTMuMTIzLDMuMDg1LTYuNjY2LDUuNDQ4LTEwLjYyOSw3LjA4NmMtMy45NjEsMS42MzgtOC4wNTcsMi40NTctMTIuMjg1LDIuNDU3cy04LjI3Ni0wLjgwOC0xMi4xNDMtMi40MjkNCgkJYy0zLjg2Ni0xLjYxOC03LjMzMy0zLjk2MS0xMC40LTcuMDI3Yy0zLjA2Ny0zLjA2Ni01LjQtNi41MjQtNy0xMC4zNzJTNS41LDMyLjc2Nyw1LjUsMjguNWMwLTQuMjI5LDAuODA5LTguMjk1LDIuNDI4LTEyLjINCgkJYzEuNjE5LTMuOTA1LDMuOTcyLTcuNCw3LjA1Ny0xMC40ODZDMjEuMDgtMC4zOTQsMjguNTY1LTMuNSwzNy40NDEtMy41eiBNMzcuNTU3LDIuMjcyYy03LjMxNCwwLTEzLjQ2NywyLjU1My0xOC40NTgsNy42NTcNCgkJYy0yLjUxNSwyLjU1My00LjQ0OCw1LjQxOS01LjgsOC42Yy0xLjM1NCwzLjE4MS0yLjAyOSw2LjUwNS0yLjAyOSw5Ljk3MmMwLDMuNDI5LDAuNjc1LDYuNzM0LDIuMDI5LDkuOTEzDQoJCWMxLjM1MywzLjE4MywzLjI4NSw2LjAyMSw1LjgsOC41MTZjMi41MTQsMi40OTYsNS4zNTEsNC4zOTksOC41MTUsNS43MTVjMy4xNjEsMS4zMTQsNi40NzYsMS45NzEsOS45NDMsMS45NzENCgkJYzMuNDI4LDAsNi43NS0wLjY2NSw5Ljk3My0xLjk5OWMzLjIxOS0xLjMzNSw2LjEyMS0zLjI1Nyw4LjcxMy01Ljc3MWM0Ljk5LTQuODc2LDcuNDg0LTEwLjk5LDcuNDg0LTE4LjM0NA0KCQljMC0zLjU0My0wLjY0OC02Ljg5NS0xLjk0My0xMC4wNTdjLTEuMjkzLTMuMTYyLTMuMTgtNS45OC01LjY1NC04LjQ1OEM1MC45ODQsNC44NDQsNDQuNzk1LDIuMjcyLDM3LjU1NywyLjI3MnogTTM3LjE1NiwyMy4xODcNCgkJbC00LjI4NywyLjIyOWMtMC40NTgtMC45NTEtMS4wMTktMS42MTktMS42ODUtMmMtMC42NjctMC4zOC0xLjI4Ni0wLjU3MS0xLjg1OC0wLjU3MWMtMi44NTYsMC00LjI4NiwxLjg4NS00LjI4Niw1LjY1Nw0KCQljMCwxLjcxNCwwLjM2MiwzLjA4NCwxLjA4NSw0LjExM2MwLjcyNCwxLjAyOSwxLjc5MSwxLjU0NCwzLjIwMSwxLjU0NGMxLjg2NywwLDMuMTgxLTAuOTE1LDMuOTQ0LTIuNzQzbDMuOTQyLDINCgkJYy0wLjgzOCwxLjU2My0yLDIuNzkxLTMuNDg2LDMuNjg2Yy0xLjQ4NCwwLjg5Ni0zLjEyMywxLjM0My00LjkxNCwxLjM0M2MtMi44NTcsMC01LjE2My0wLjg3NS02LjkxNS0yLjYyOQ0KCQljLTEuNzUyLTEuNzUyLTIuNjI4LTQuMTktMi42MjgtNy4zMTNjMC0zLjA0OCwwLjg4Ni01LjQ2NiwyLjY1Ny03LjI1N2MxLjc3MS0xLjc5LDQuMDA5LTIuNjg2LDYuNzE1LTIuNjg2DQoJCUMzMi42MDQsMTguNTU4LDM1LjQ0MSwyMC4xMDEsMzcuMTU2LDIzLjE4N3ogTTU1LjYxMywyMy4xODdsLTQuMjI5LDIuMjI5Yy0wLjQ1Ny0wLjk1MS0xLjAyLTEuNjE5LTEuNjg2LTINCgkJYy0wLjY2OC0wLjM4LTEuMzA3LTAuNTcxLTEuOTE0LTAuNTcxYy0yLjg1NywwLTQuMjg3LDEuODg1LTQuMjg3LDUuNjU3YzAsMS43MTQsMC4zNjMsMy4wODQsMS4wODYsNC4xMTMNCgkJYzAuNzIzLDEuMDI5LDEuNzg5LDEuNTQ0LDMuMjAxLDEuNTQ0YzEuODY1LDAsMy4xOC0wLjkxNSwzLjk0MS0yLjc0M2w0LDJjLTAuODc1LDEuNTYzLTIuMDU3LDIuNzkxLTMuNTQxLDMuNjg2DQoJCWMtMS40ODYsMC44OTYtMy4xMDUsMS4zNDMtNC44NTcsMS4zNDNjLTIuODk2LDAtNS4yMDktMC44NzUtNi45NDEtMi42MjljLTEuNzM2LTEuNzUyLTIuNjAyLTQuMTktMi42MDItNy4zMTMNCgkJYzAtMy4wNDgsMC44ODUtNS40NjYsMi42NTgtNy4yNTdjMS43Ny0xLjc5LDQuMDA4LTIuNjg2LDYuNzEzLTIuNjg2QzUxLjExNywxOC41NTgsNTMuOTM4LDIwLjEwMSw1NS42MTMsMjMuMTg3eiIvPg0KPC9nPg0KPC9zdmc+DQo=){width="20"}![](data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAxMy4wLjIsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDE0OTQ4KSAgLS0+DQo8IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDEuMC8vRU4iICJodHRwOi8vd3d3LnczLm9yZy9UUi8yMDAxL1JFQy1TVkctMjAwMTA5MDQvRFREL3N2ZzEwLmR0ZCI+DQo8c3ZnIHZlcnNpb249IjEuMCIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4Ig0KCSB3aWR0aD0iNjRweCIgaGVpZ2h0PSI2NHB4IiB2aWV3Qm94PSI1LjUgLTMuNSA2NCA2NCIgZW5hYmxlLWJhY2tncm91bmQ9Im5ldyA1LjUgLTMuNSA2NCA2NCIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+DQo8Zz4NCgk8Y2lyY2xlIGZpbGw9IiNGRkZGRkYiIGN4PSIzNy42MzciIGN5PSIyOC44MDYiIHI9IjI4LjI3NiIvPg0KCTxnPg0KCQk8cGF0aCBkPSJNMzcuNDQzLTMuNWM4Ljk4OCwwLDE2LjU3LDMuMDg1LDIyLjc0Miw5LjI1N0M2Ni4zOTMsMTEuOTY3LDY5LjUsMTkuNTQ4LDY5LjUsMjguNWMwLDguOTkxLTMuMDQ5LDE2LjQ3Ni05LjE0NSwyMi40NTYNCgkJCUM1My44NzksNTcuMzE5LDQ2LjI0Miw2MC41LDM3LjQ0Myw2MC41Yy04LjY0OSwwLTE2LjE1My0zLjE0NC0yMi41MTQtOS40M0M4LjY0NCw0NC43ODQsNS41LDM3LjI2Miw1LjUsMjguNQ0KCQkJYzAtOC43NjEsMy4xNDQtMTYuMzQyLDkuNDI5LTIyLjc0MkMyMS4xMDEtMC40MTUsMjguNjA0LTMuNSwzNy40NDMtMy41eiBNMzcuNTU3LDIuMjcyYy03LjI3NiwwLTEzLjQyOCwyLjU1My0xOC40NTcsNy42NTcNCgkJCWMtNS4yMiw1LjMzNC03LjgyOSwxMS41MjUtNy44MjksMTguNTcyYzAsNy4wODYsMi41OSwxMy4yMiw3Ljc3LDE4LjM5OGM1LjE4MSw1LjE4MiwxMS4zNTIsNy43NzEsMTguNTE0LDcuNzcxDQoJCQljNy4xMjMsMCwxMy4zMzQtMi42MDcsMTguNjI5LTcuODI4YzUuMDI5LTQuODM4LDcuNTQzLTEwLjk1Miw3LjU0My0xOC4zNDNjMC03LjI3Ni0yLjU1My0xMy40NjUtNy42NTYtMTguNTcxDQoJCQlDNTAuOTY3LDQuODI0LDQ0Ljc5NSwyLjI3MiwzNy41NTcsMi4yNzJ6IE00Ni4xMjksMjAuNTU3djEzLjA4NWgtMy42NTZ2MTUuNTQyaC05Ljk0NFYzMy42NDNoLTMuNjU2VjIwLjU1Nw0KCQkJYzAtMC41NzIsMC4yLTEuMDU3LDAuNTk5LTEuNDU3YzAuNDAxLTAuMzk5LDAuODg3LTAuNiwxLjQ1Ny0wLjZoMTMuMTQ0YzAuNTMzLDAsMS4wMSwwLjIsMS40MjgsMC42DQoJCQlDNDUuOTE4LDE5LjUsNDYuMTI5LDE5Ljk4Niw0Ni4xMjksMjAuNTU3eiBNMzMuMDQyLDEyLjMyOWMwLTMuMDA4LDEuNDg1LTQuNTE0LDQuNDU4LTQuNTE0czQuNDU3LDEuNTA0LDQuNDU3LDQuNTE0DQoJCQljMCwyLjk3MS0xLjQ4Niw0LjQ1Ny00LjQ1Nyw0LjQ1N1MzMy4wNDIsMTUuMywzMy4wNDIsMTIuMzI5eiIvPg0KCTwvZz4NCjwvZz4NCjwvc3ZnPg0K){width="20"}![](data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAxMy4wLjIsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDE0OTQ4KSAgLS0+DQo8IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDEuMC8vRU4iICJodHRwOi8vd3d3LnczLm9yZy9UUi8yMDAxL1JFQy1TVkctMjAwMTA5MDQvRFREL3N2ZzEwLmR0ZCI+DQo8c3ZnIHZlcnNpb249IjEuMCIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4Ig0KCSB3aWR0aD0iNjRweCIgaGVpZ2h0PSI2NHB4IiB2aWV3Qm94PSI1LjUgLTMuNSA2NCA2NCIgZW5hYmxlLWJhY2tncm91bmQ9Im5ldyA1LjUgLTMuNSA2NCA2NCIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+DQo8Zz4NCgk8Y2lyY2xlIGZpbGw9IiNGRkZGRkYiIGN4PSIzNy40NyIgY3k9IjI4LjczNiIgcj0iMjkuNDcxIi8+DQoJPGc+DQoJCTxwYXRoIGQ9Ik0zNy40NDItMy41YzguOTksMCwxNi41NzEsMy4wODUsMjIuNzQzLDkuMjU2QzY2LjM5MywxMS45MjgsNjkuNSwxOS41MDksNjkuNSwyOC41YzAsOC45OTItMy4wNDgsMTYuNDc2LTkuMTQ1LDIyLjQ1OA0KCQkJQzUzLjg4LDU3LjMyLDQ2LjI0MSw2MC41LDM3LjQ0Miw2MC41Yy04LjY4NiwwLTE2LjE5LTMuMTYyLTIyLjUxMy05LjQ4NUM4LjY0NCw0NC43MjgsNS41LDM3LjIyNSw1LjUsMjguNQ0KCQkJYzAtOC43NjIsMy4xNDQtMTYuMzQzLDkuNDI5LTIyLjc0M0MyMS4xLTAuNDE0LDI4LjYwNC0zLjUsMzcuNDQyLTMuNXogTTEyLjcsMTkuODcyYy0wLjk1MiwyLjYyOC0xLjQyOSw1LjUwNS0xLjQyOSw4LjYyOQ0KCQkJYzAsNy4wODYsMi41OSwxMy4yMiw3Ljc3LDE4LjRjNS4yMTksNS4xNDQsMTEuMzkxLDcuNzE1LDE4LjUxNCw3LjcxNWM3LjIwMSwwLDEzLjQwOS0yLjYwOCwxOC42My03LjgyOQ0KCQkJYzEuODY3LTEuNzksMy4zMzItMy42NTcsNC4zOTgtNS42MDJsLTEyLjA1Ni01LjM3MWMtMC40MjEsMi4wMi0xLjQzOSwzLjY2Ny0zLjA1Nyw0Ljk0MmMtMS42MjIsMS4yNzYtMy41MzUsMi4wMTEtNS43NDQsMi4yDQoJCQl2NC45MTVoLTMuNzE0di00LjkxNWMtMy41NDMtMC4wMzYtNi43ODItMS4zMTItOS43MTQtMy44MjdsNC40LTQuNDU3YzIuMDk0LDEuOTQyLDQuNDc2LDIuOTEzLDcuMTQzLDIuOTEzDQoJCQljMS4xMDQsMCwyLjA0OC0wLjI0NiwyLjgzLTAuNzQzYzAuNzgtMC40OTQsMS4xNzItMS4zMTIsMS4xNzItMi40NTdjMC0wLjgwMS0wLjI4Ny0xLjQ0OC0wLjg1OC0xLjk0M2wtMy4wODUtMS4zMTVsLTMuNzcxLTEuNzE1DQoJCQlsLTUuMDg2LTIuMjI5TDEyLjcsMTkuODcyeiBNMzcuNTU3LDIuMjE0Yy03LjI3NiwwLTEzLjQyOCwyLjU3MS0xOC40NTcsNy43MTRjLTEuMjU4LDEuMjU4LTIuNDM5LDIuNjg2LTMuNTQzLDQuMjg3TDI3Ljc4NiwxOS43DQoJCQljMC41MzMtMS42NzYsMS41NDItMy4wMTksMy4wMjktNC4wMjhjMS40ODQtMS4wMDksMy4yMTgtMS41NzEsNS4yLTEuNjg2VjkuMDcxaDMuNzE1djQuOTE1YzIuOTM0LDAuMTUzLDUuNiwxLjE0Myw4LDIuOTcxDQoJCQlsLTQuMTcyLDQuMjg2Yy0xLjc5My0xLjI1Ny0zLjYxOS0xLjg4NS01LjQ4Ni0xLjg4NWMtMC45OTEsMC0xLjg3NiwwLjE5MS0yLjY1NiwwLjU3MWMtMC43ODEsMC4zODEtMS4xNzIsMS4wMjktMS4xNzIsMS45NDMNCgkJCWMwLDAuMjY3LDAuMDk1LDAuNTMzLDAuMjg1LDAuOGw0LjA1NywxLjgzbDIuOCwxLjI1N2w1LjE0NCwyLjI4NWwxNi4zOTcsNy4zMTRjMC41MzUtMi4yNDgsMC44MDEtNC41MzMsMC44MDEtNi44NTcNCgkJCWMwLTcuMzUzLTIuNTUyLTEzLjU0My03LjY1Ni0xOC41NzNDNTEuMDA1LDQuNzg1LDQ0LjgzMSwyLjIxNCwzNy41NTcsMi4yMTR6Ii8+DQoJPC9nPg0KPC9nPg0KPC9zdmc+DQo=){width="20"}]{.text style="display: block; text-align: center;"}
+
+## Unión de datasets
+
+En el ejercicio práctico de una clase anterior aprendimos que podíamos unir dos bases por sus columnas en común mediante el comando `left_join()` del paquete `dplyr`, incluido dentro de `tidyverse`. En esta clase exploraremos más a fondo este comando y otras opciones que trae `dplyr` para unir datasets.
+
+Comencemos por cargar los paquetes necesarios:
+
+```{r}
+## Carga paquetes
+pacman::p_load(
+  tmap,
+  sf,
+  rio,
+  janitor,
+  tidyverse
+)
+```
+
+Veremos la utilidad de los paquetes `sf` y `tmap` más adelante en esta lección. Comencemos por cargar y limpiar la base con los datos de pacientes:
+
+```{r}
+## Datos pacientes
+pacientes_clean <- import("../raw/base_pacientes.xlsx") |> 
+  # estandariza nombres de columnas
+  clean_names() |> 
+  
+  # renombra columnas manualmente
+  rename(depto_residencia = depto_r,
+         depto_muestra = depto_m,
+         provincia_residencia = provincia_resid) |> 
+  
+  # filtra datos de otras provincias
+  filter(!is.na(depto_residencia)) |> 
+  
+  # filtra registros sin edad y sexo
+  filter(!is.na(sexo) & !is.na(edad_diagnostico)) |> 
+  
+  # corrige nombre provincia
+  mutate(provincia_residencia = "Santa Fe") |> 
+  
+  # cambia etiquetas sexo
+  mutate(sexo = if_else(sexo == "M", "masculino", "femenino")) |> 
+  
+  # cambia formato de fechas
+  mutate(fecha_toma_muestra = dmy(fecha_toma_muestra)) |> 
+  
+  ## Crea nuevas columnas
+  # año toma de muestra
+  mutate(anio_toma_muestra = year(fecha_toma_muestra)) |> 
+  
+  # semana epidemiológica
+  mutate(semana_toma_muestra = epiweek(fecha_toma_muestra)) |> 
+  
+  # edad en años
+  mutate(edad_anios = case_when(
+    tipo_edad_diagnostico=="MESES" ~ edad_diagnostico/12,
+    grupo_edad %in% c("<= 1 AÑO") ~ edad_diagnostico/12,
+    TRUE ~ edad_diagnostico)) |> 
+  
+  # ordena columnas
+  select(id_paciente, sexo, edad_anios, contains("resid"),
+         contains("muest"), internado) |> 
+  
+  # limpia duplicados
+  distinct()
+```
+
+Ahora hacemos lo mismo con la base de los síntomas y la de los resultados de laboratorio:
+
+```{r}
+## Datos síntomas
+sintomas_clean <- import("../raw/base_sintomas.csv") |> 
+  # estandariza nombres de columnas
+  clean_names() |> 
+  
+  # renombra manualmente columnas
+  rename(
+    sexo = genero,
+    fecha_toma_muestra = ftm,
+    nauseas_vomitos = nauseasyvomitos,
+    dolor_pantorrillas = dolor_de_pantorrillas,
+    estado_gripal = gripal
+  ) |> 
+  
+  # corrige formato fechas
+  mutate(fecha_toma_muestra = dmy(fecha_toma_muestra)) |> 
+  
+  # cambia etiquetas sexo
+  mutate(sexo = if_else(sexo == "M", "masculino", "femenino")) |> 
+  
+  # corrige valores faltantes
+  mutate(across(where(is.character), 
+                .fns = ~ na_if(.x, ""))) |> 
+  
+  # limpia duplicados
+  distinct()
+  
+  
+## Datos laboratorio
+laboratorio_clean <- import("../raw/base_lab.xlsx") |> 
+  # estandariza nombre de columnas
+  clean_names() |> 
+  
+  # renombra manualmente columnas
+  rename(id_paciente = id_pte) |> 
+  
+  # corrige formato fechas
+  mutate(fecha_inicio_sintomas = convert_to_date(fecha_inicio_sintomas)) |> 
+  ## Crea nuevas variables
+  # año inicio síntomas
+  mutate(anio_inicio_sintomas = year(fecha_inicio_sintomas)) |> 
+  
+  # semana epidemiológica
+  mutate(semana_inicio_sintomas = epiweek(fecha_inicio_sintomas)) |> 
+  
+  # recategoriza resultado
+  mutate(resultado_cat = if_else(grepl("CONF", resultado),
+                                 "POS", "NEG"),
+         
+         resultado_tipo = case_when(grepl("CONF|PROB", resultado) ~ 1,
+                                    TRUE ~ 0)) |> 
+  
+  
+  # limpia duplicados
+  distinct()
+```
+
+### Comando `left_join()`
+
+Retorna todas las filas de la base X (la base de la izquierda) y las filas de la base Y que coinciden con las de la base X. Si no hay coincidencia, las filas de la base X se mantienen y los valores de la base Y se llenan con `NA`.
+
+En el caso de nuestros datos:
+
+```{r}
+# Une bases
+base_left <- left_join(pacientes_clean, sintomas_clean)
+
+# Chequea número de filas y columnas
+glimpse(pacientes_clean)
+
+glimpse(sintomas_clean)
+
+glimpse(base_left)
+```
+
+Cuando unimos con `left_join()` se mantienen todas las filas de la base `pacientes_clean` y se descartan las filas de `sintomas_clean` que no coinciden con los valores de la columna en común `id_paciente`, `sexo` y `fecha_toma_muestra`.
+
+También puedo especificar por cuales columnas en común quiero unir los datos y en este caso las columnas duplicadas se diferenciarán por los sufijos `.x` y `.y`. Esto es útil cuando suponemos que puede haber errores de carga en alguna de las bases que no permiten que el *join* se realice correctamente.
+
+```{r}
+# Une bases
+base_left <- left_join(pacientes_clean, sintomas_clean,
+                       by = "id_paciente")
+
+# Chequea número de filas y columnas base unida
+glimpse(base_left)
+```
+
+### Comando `right_join()`
+
+Retorna todas las filas de la base Y (la base de la derecha) y las filas de la base X que coinciden con las de la base Y. Si no hay coincidencia, las filas de la base Y se mantienen y los valores de la base X se llenan con `NA`.
+
+```{r}
+## Une bases
+base_right <- right_join(pacientes_clean, sintomas_clean)
+
+# Chequea número de filas y columnas
+glimpse(pacientes_clean)
+
+glimpse(sintomas_clean)
+
+glimpse(base_right)
+
+# Chequeo NAs
+tabyl(base_right$depto_residencia)
+```
+
+La base nos muestra que hay 15 valores ausentes para `depto_residencia`, correspondientes a los registros que no pudieron unirse.
+
+### Comando `inner_join()`
+
+Retorna todas las filas de ambas bases que tienen valores coincidentes en las columnas especificadas. Si una fila en la base X no tiene una coincidencia en la base Y, esa fila no se incluye en el resultado, y viceversa.
+
+```{r}
+# Une bases
+base_inner <- inner_join(pacientes_clean, sintomas_clean)
+
+# Chequea número de filas y columnas
+glimpse(base_inner)
+```
+
+### Comando `full_join()`
+
+Retorna todas las filas de ambas bases, uniendo las que coinciden y llenando con `NA` donde no hay coincidencias.
+
+```{r}
+# Une bases
+base_full <- full_join(pacientes_clean, sintomas_clean)
+
+# Chequea número de filas y columnas
+glimpse(base_full)
+```
+
+### Comando `semi_join()`
+
+Retorna todas las filas de la base X que tienen una coincidencia en la base Y. No agrega columnas de la base Y, solo filtra las filas de la base X.
+
+```{r}
+# Une bases
+base_semi <- semi_join(pacientes_clean, sintomas_clean)
+
+# Chequea número de filas y columnas
+glimpse(base_semi)
+```
+
+### Comando `anti_join()`
+
+Retorna todas las filas de la base X que **no** tienen una coincidencia en la base Y.
+
+```{r}
+# Une bases
+base_anti <- anti_join(pacientes_clean, sintomas_clean)
+
+# Chequea número de filas y columnas
+glimpse(base_anti)
+```
+
+### Comando `bind_rows()`
+
+Combina dos o más datasets añadiendo sus filas. Las columnas de los data frames deben tener los mismos nombres, o se crearán columnas nuevas si alguna columna no existe en alguno de los data frames.
+
+```{r}
+# Une bases
+base_bind_row <- bind_rows(pacientes_clean, sintomas_clean)
+
+# Chequea número de filas y columnas
+glimpse(base_bind_row)
+```
+
+### Comando `bind_cols()`
+
+Combina dos o más datasets añadiendo sus columnas. Las filas deben ser de la misma longitud; de lo contrario, se completarán con `NA`.
+
+```{r}
+#| error: true
+# Une bases
+base_bind_col <- bind_cols(pacientes_clean, sintomas_clean)
+
+# Chequea número de filas y columnas
+glimpse(base_bind_col)
+```
+
+En este caso, vamos a obtener un mensaje de error al intentar unir los datasets ya que el número de filas en la base X es diferente al número de filas en la base Y
+
+### Utilidades de la unión de datasets
+
+Los comandos `xxx_join()` se utilizan para unir dos datasets basándose en una o más columnas comunes. Son útiles para:
+
+-   **Unir datos relacionados**: unir dos datasets con información relacionada en uno solo.
+
+-   **Análisis combinado**: uniendo datasets con diferentes aspectos del mismo conjunto de datos.
+
+-   **Enriquecimiento de datos**: se puede enriquecer un conjunto de datos con información adicional de otro dataset.
+
+-   **Filtrado específico**: filtrar datos usando `semi_join` o `anti_join` en base a coincidencias o la falta de ellas en otro dataset.
+
+Por otro lado, los comandos `bind_xxx()` se utilizan para añadir filas o columnas a un dataset, siendo especialmente útiles para:
+
+-   **Agregar nuevas observaciones**: se pueden combinar varios datasets que representan diferentes observaciones de la misma estructura (por ejemplo, datos de diferentes meses o años).
+
+-   **Concatenación de resultados**: cuando se quieren analizar juntos múltiples resultados de diferentes cálculos o simulaciones.
+
+-   **Agregar nuevas variables**: cuando se tienen bases que contienen diferentes variables (columnas) para las mismas observaciones (filas), puedes combinarlas en una sola.
+
+-   **Construcción de dataframes complejos**: cuando se cuenta diferentes componentes de datos y queremos combinarlos en una sola estructura para análisis más completo
+
+En la vida real, los comandos de unión que más se utilizan son `left_join()` y `bind_rows()`, pero en algunos casos `inner_join()` y `anti_join()` resultan de utilidad para explorar los datos.
+
+Terminemos de unir las bases de nuestra práctica (recuerden que solo pueden unirse dos bases por vez al usar los `joins`):
+
+```{r}
+# Une bases
+base_clean <- left_join(pacientes_clean, sintomas_clean) |> 
+  
+  # añado base resultados
+  left_join(laboratorio_clean)
+
+# Guardo base limpia
+export(base_clean, file = "../clean/base_clean.xlsx")
+
+# Limpio working environment
+rm(list = ls())
+```
+
+## Mapas en ggplot2
+
+Lo que vimos anteriormente sobre unión de datasets nos servirá para el siguiente paso: generar mapas con `ggplot2` y sus paquetes accesorios `sf` y `tmap`.
+
+### Mapas estáticos con `sf`
+
+El paquete `sf` (Simple Features for R) está diseñado para manejar datos vectoriales espaciales de manera eficiente y fácil de usar, y sigue el estándar Simple Features Access (SFA) definido por el Open Geospatial Consortium (OGC). Su capacidad para manejar múltiples formatos de datos espaciales, y sus funciones para realizar análisis y visualización geoespacial lo hacen invaluable para investigadores y profesionales que trabajan con datos espaciales en campos como geografía, ecología, epidemiología, etc.
+
+Veamos como generar un mapa sencillo en `ggplot2` usando la base de datos que limpiamos anteriormente:
+
+```{r}
+# Carga base limpia pacientes
+base_clean <- import("../clean/base_clean.xlsx")
+```
+
+Ahora procederemos a cargar una capa geográfica (GIS) que contiene información climática de los distintos departamentos de la provincia de Santa Fe, obtenida de la [Plataforma Abierta de Datos Espaciales de la Argentina (POBLACIONES)](https://poblaciones.org/category/cartografias/) y podemos descargarla en la carpeta **datos_clean** subida a la página del curso. Las capas GIS se componen de cinco archivos, siendo el principal, que utilizaremos para leer la capa el que tiene extensión `.shp`, mientras que el resto contiene información importante sobre la proyección geográfica y la correcta lectura de la capa. El comando para leer capas geográficas se llama `st_read` y es parte del paquete `sf`.
+
+```{r}
+# Carga capa GIS
+deptos_sf <- st_read("../clean/Elevación, precipitaciones y temperaturas medias por departamento - Santa Fe.shp")
+
+# Explora capa
+glimpse(deptos_sf)
+```
+
+Ahora procederemos a limpiar un poco la capa geográfica usando las funciones de `tidyverse`. Según el diccionario de datos adjunto en la carpeta, nos interesa mantener las variables `dpto`, `categoria_altura`, `precip_anual` y `temp_anual_media`.
+
+```{r}
+# Limpia dataset
+deptos_sf <- deptos_sf |> 
+  # estandariza nombres columnas
+  clean_names() |> 
+  
+  # cambia manualmente nombres columnas
+  rename(
+    altura_cat = categoria,
+    precip_anual = precipitac,
+    temp_anual_media = temperatur) |> 
+  
+  # cambia a mayúsculas nombres deptos
+  mutate(dpto = toupper(dpto)) |> 
+  
+  # descarta columnas innecesarias
+  select(dpto, altura_cat, precip_anual, temp_anual_media)
+```
+
+Uniremos la base de los pacientes con la capa GIS usando `left_join()`:
+
+```{r}
+# Une base y datos GIS
+base_gis <- left_join(base_clean, deptos_sf,
+                      by = c("depto_residencia" = "dpto"))
+
+# Explora NAs nuevas columnas
+tabyl(base_gis$altura_cat)
+```
+
+Observamos que 52 filas tienen valores ausentes para la columna `altura_cat`, esto posiblemente se deba a que los nombres de los departamentos en la capa GIS contengan acentos o caracteres especiales, para estandarizarlos usaremos el comando `stri_trans_general()` del paquete `stringi`:
+
+```{r}
+deptos_sf <- deptos_sf |> 
+  mutate(dpto = stringi::stri_trans_general(dpto, id = "Latin-ASCII"))
+```
+
+Ahora volveremos a correr la unión de bases:
+
+```{r}
+# Une base y datos GIS
+base_gis <- left_join(base_clean, deptos_sf,
+                      by = c("depto_residencia" = "dpto"))
+
+# Explora NAs nuevas columnas
+tabyl(base_gis$altura_cat)
+```
+
+No quedan columnas con NAs, así que podemos proceder a convertir la base en objeto espacial con el comando `st_as_sf()` y luego generar una tabla con los casos de leptospirosis por departamento:
+
+```{r}
+# Estructura base original
+class(base_gis)
+
+## Crea base casos por depto
+casos_depto_gis <- base_gis |> 
+  # transforma a objeto espacial
+  st_as_sf() |> 
+  
+  # tabla de casos por departamento
+  count(depto_residencia, altura_cat, precip_anual, temp_anual_media,
+        resultado_tipo) |> 
+  
+  # filtra casos descartados
+  filter(resultado_tipo == 1)
+
+# Estructura de la nueva base
+class(casos_depto_gis)
+
+glimpse(casos_depto_gis)
+```
+
+Podemos ver que la nueva base tiene estructura `"sf"` y `"data.frame"` y que se mantiene la columna `geometry` a pesar de no haberla incluido en el `count()`. Esto se debe a que `geometry` contiene la información geográfica necesaria para graficar la capa como mapa.
+
+Procederemos a crear nuestro primer mapa usando `ggplot2` y el comando `geom_sf()`:
+
+```{r}
+## Genera mapa
+ggplot() +
+  geom_sf(data = casos_depto_gis)
+```
+
+Vemos que la bota de la provincia de Santa Fe aparece cortada, ya que no se registraron casos de leptospirosis en todos los departamentos durante el periodo de estudio. Vamos a asignarle una escala de color dinámica según el número de casos y a colocar el mapa de todos los departamentos como capa base. A diferencia de lo que vimos anteriormente en `ggplot2`, cuando trabajamos con más de una capa geográfica conviene llamar el argumento `data =` dentro de cada geoma.
+
+```{r}
+## Genera mapa
+ggplot() +
+  # Añade capa base departamentos
+  geom_sf(data = deptos_sf) +
+  
+  # Añade casos por departamento
+  geom_sf(data = casos_depto_gis, mapping = aes(fill = n)) +
+  
+  # cambia escala color colorblind-friendly
+  scale_fill_viridis_c(alpha = .75) +
+  
+  # Tema claro
+  theme_minimal()
+```
+
+El gráfico obtenido se conoce como **mapa coroplético** y muestra áreas delimitadas en distintos colores para representar variaciones espaciales de una variable específica. Es particularmente útil para visualizar datos geoespaciales como densidad poblacional, tasas de una enfermedad, temperaturas y precipitaciones medias, etc.
+
+#### Actividad:
+
+Siguiendo el ejemplo anterior, generen mapas coropléticos para el resto de las variables de `casos_depto_gis`, observen detenidamente los mapas para detectar si existe algún tipo de patrón climático asociado a los casos de leptospirosis. Pueden usar facets para colocar los mapas uno al lado del otro.
+
+### Mapas estáticos y dinámicos con `tmap`
+
+Finalmente, veremos el paquete `tmap`, que expande las funciones de `sf` y `ggplot2` permitiendo generar mapas dinámicos con la opción `tmap_mode("view")`. Un pequeño ejemplo a partir del mapa generado anteriormente:
+
+```{r}
+# Modo dinámico
+tmap_mode("view")
+
+# Genero mapa
+mapa_dinamico <- 
+  # Mapa base
+  tm_basemap(server = "OpenStreetMap") +
+  
+  # Capa departamentos
+  tm_shape(shp = deptos_sf) +
+  tm_borders() +
+  
+  # Capa casos por depto
+  tm_shape(shp = casos_depto_gis) +
+  tm_polygons(col = "n")
+```
+
+El comando `tm_basemap()` crea un mapa base usando capas de OpenStreetMap u otros servidores, por otro lado `tm_shape()` llama a la capa geográfica que queremos graficar y los comandos `tm_borders()`, `tm_fill()`, `tm_polygons()`, indican de que forma quiero que aparezcan (solo bordes, solo relleno, bordes y relleno). Por otro lado, el argumento `col =` nos permite especificar si el color de relleno será estático o dinámico de acuerdo a los valores de alguna variable o variables de la capa. Existe gran diversidad de opciones de configuración, así como comandos para datos geográficos de puntos, que les invito a que exploren de acuerdo a sus necesidades.
+
+#### Actividad
+
+Al mapa anterior, añadirle las demás capas de la base mediante el argumento `col = c("var1", "var2", ...,"varn")` y ver que ocurre. Pueden jugar con la transparencia de las capas y usar paletas personalizadas con los paquetes `RColorBrewer` y `scico`. También pueden ocultar y mostrar capas en la vista interactiva usando el argumento `group =` .
+
+## Documentos con R Markdown
+
+RMarkdown es una extensión del lenguaje Markdown que se utiliza para formatear texto y permite integrar código de R directamente en un documento que puede contener texto, gráficos y otros elementos. Los documentos de RMarkdown se componen de tres partes:
+
+-   **Cabecera YAML**: sección al comienzo del documento que contiene metadatos sobre el documento como ser título, autor, fecha y formato de salida. Se delimita por triple guión medio `---`.
+
+<!-- -->
+
+-   **Bloques de código:** secciones de código delimitadas por triple tilde o backticks (```` ```{r} ````) donde se escribe el código R.
+
+    ```{markdown}
+    # Código R
+    summary(mtcars)
+    ```
+
+-   **Texto:** texto en formato Markdown que describe y explica los resultados del código, mezclado con los bloques de código.
+
+Si bien originalmente estaba contemplado aprender a generar documentos de Markdown, la complejidad del mismo excede el contenido del curso. Por otro lado, POSIT, los creadores de RStudio y RMarkdown están trabajando en reemplazarlo por Quarto, otro lenguaje de marcas mucho más versátil y amigable con el usuario.
+
+Quienes tengan interés en Quarto, pueden acceder a las clases del taller que dicta Christian Ballejo haciendo click aquí:
+
+-   [Introducción a Quarto](https://cballejo.github.io/2024/Encuentro3/#/hola-quarto-title)
+
+-   [Documentos estáticos en Quarto](https://cballejo.github.io/2024/Encuentro4/#/docu-estaticos-title) parte 1
+
+-   [Documentos estáticos en Quarto](https://cballejo.github.io/2024/Encuentro5/#/docu-estaticos-title) parte 2
+
+## ¿Qué sigue ahora?
+
+Esta es la última clase teórico-práctica del curso de introducción a `tidyverse`. Para aprobar el mismo deberán realizar una actividad evaluativa final en donde deberán aplicar todos los conocimientos que adquirieron en el curso a un nuevo dataset. Es necesario que tengan aprobadas las actividades 1 y 2 para poder acceder al trabajo final, mientras que el resto de los ejercicios no son obligatorios.
+
+La actividad final la estaré subiendo durante la primer semana de julio y tendrán un plazo de 20 días para realizarla.
+
+Espero que el curso les haya sido de utilidad, muchas gracias a quienes llegaron hasta el final del mismo!!!

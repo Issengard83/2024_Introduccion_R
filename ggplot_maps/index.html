@@ -1,0 +1,1392 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.554">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Unión de datasets, mapas con ggplot2 y documentos RMarkdown</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="index_files/libs/clipboard/clipboard.min.js"></script>
+<script src="index_files/libs/quarto-html/quarto.js"></script>
+<script src="index_files/libs/quarto-html/popper.min.js"></script>
+<script src="index_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="index_files/libs/quarto-html/anchor.min.js"></script>
+<link href="index_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="index_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="index_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="index_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="index_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Contenidos</h2>
+   
+  <ul>
+  <li><a href="#unión-de-datasets" id="toc-unión-de-datasets" class="nav-link active" data-scroll-target="#unión-de-datasets">Unión de datasets</a>
+  <ul class="collapse">
+  <li><a href="#comando-left_join" id="toc-comando-left_join" class="nav-link" data-scroll-target="#comando-left_join">Comando <code>left_join()</code></a></li>
+  <li><a href="#comando-right_join" id="toc-comando-right_join" class="nav-link" data-scroll-target="#comando-right_join">Comando <code>right_join()</code></a></li>
+  <li><a href="#comando-inner_join" id="toc-comando-inner_join" class="nav-link" data-scroll-target="#comando-inner_join">Comando <code>inner_join()</code></a></li>
+  <li><a href="#comando-full_join" id="toc-comando-full_join" class="nav-link" data-scroll-target="#comando-full_join">Comando <code>full_join()</code></a></li>
+  <li><a href="#comando-semi_join" id="toc-comando-semi_join" class="nav-link" data-scroll-target="#comando-semi_join">Comando <code>semi_join()</code></a></li>
+  <li><a href="#comando-anti_join" id="toc-comando-anti_join" class="nav-link" data-scroll-target="#comando-anti_join">Comando <code>anti_join()</code></a></li>
+  <li><a href="#comando-bind_rows" id="toc-comando-bind_rows" class="nav-link" data-scroll-target="#comando-bind_rows">Comando <code>bind_rows()</code></a></li>
+  <li><a href="#comando-bind_cols" id="toc-comando-bind_cols" class="nav-link" data-scroll-target="#comando-bind_cols">Comando <code>bind_cols()</code></a></li>
+  <li><a href="#utilidades-de-la-unión-de-datasets" id="toc-utilidades-de-la-unión-de-datasets" class="nav-link" data-scroll-target="#utilidades-de-la-unión-de-datasets">Utilidades de la unión de datasets</a></li>
+  </ul></li>
+  <li><a href="#mapas-en-ggplot2" id="toc-mapas-en-ggplot2" class="nav-link" data-scroll-target="#mapas-en-ggplot2">Mapas en ggplot2</a>
+  <ul class="collapse">
+  <li><a href="#mapas-estáticos-con-sf" id="toc-mapas-estáticos-con-sf" class="nav-link" data-scroll-target="#mapas-estáticos-con-sf">Mapas estáticos con <code>sf</code></a></li>
+  <li><a href="#mapas-estáticos-y-dinámicos-con-tmap" id="toc-mapas-estáticos-y-dinámicos-con-tmap" class="nav-link" data-scroll-target="#mapas-estáticos-y-dinámicos-con-tmap">Mapas estáticos y dinámicos con <code>tmap</code></a></li>
+  </ul></li>
+  <li><a href="#documentos-con-r-markdown" id="toc-documentos-con-r-markdown" class="nav-link" data-scroll-target="#documentos-con-r-markdown">Documentos con R Markdown</a></li>
+  <li><a href="#qué-sigue-ahora" id="toc-qué-sigue-ahora" class="nav-link" data-scroll-target="#qué-sigue-ahora">¿Qué sigue ahora?</a></li>
+  </ul>
+</nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Unión de datasets, mapas con ggplot2 y documentos RMarkdown</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p><span class="text" style="display: block; text-align: center;">Este material es parte del curso <strong>Introducción a R <em>tidyverse</em> del Instituto Nacional de Epidemiología “Dr.&nbsp;Juan H. Jara” - ANLIS</strong></span></p>
+<p><span class="text" style="display: block; text-align: center;">Creado por Tamara Ricardo, licensed under <a href="#0">CC BY-NC 4.0</a> <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAxMy4wLjIsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDE0OTQ4KSAgLS0+DQo8IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDEuMC8vRU4iICJodHRwOi8vd3d3LnczLm9yZy9UUi8yMDAxL1JFQy1TVkctMjAwMTA5MDQvRFREL3N2ZzEwLmR0ZCI+DQo8c3ZnIHZlcnNpb249IjEuMCIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4Ig0KCSB3aWR0aD0iNjRweCIgaGVpZ2h0PSI2NHB4IiB2aWV3Qm94PSI1LjUgLTMuNSA2NCA2NCIgZW5hYmxlLWJhY2tncm91bmQ9Im5ldyA1LjUgLTMuNSA2NCA2NCIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+DQo8Zz4NCgk8Y2lyY2xlIGZpbGw9IiNGRkZGRkYiIGN4PSIzNy43ODUiIGN5PSIyOC41MDEiIHI9IjI4LjgzNiIvPg0KCTxwYXRoIGQ9Ik0zNy40NDEtMy41YzguOTUxLDAsMTYuNTcyLDMuMTI1LDIyLjg1Nyw5LjM3MmMzLjAwOCwzLjAwOSw1LjI5NSw2LjQ0OCw2Ljg1NywxMC4zMTQNCgkJYzEuNTYxLDMuODY3LDIuMzQ0LDcuOTcxLDIuMzQ0LDEyLjMxNGMwLDQuMzgxLTAuNzczLDguNDg2LTIuMzE0LDEyLjMxM2MtMS41NDMsMy44MjgtMy44Miw3LjIxLTYuODI4LDEwLjE0Mw0KCQljLTMuMTIzLDMuMDg1LTYuNjY2LDUuNDQ4LTEwLjYyOSw3LjA4NmMtMy45NjEsMS42MzgtOC4wNTcsMi40NTctMTIuMjg1LDIuNDU3cy04LjI3Ni0wLjgwOC0xMi4xNDMtMi40MjkNCgkJYy0zLjg2Ni0xLjYxOC03LjMzMy0zLjk2MS0xMC40LTcuMDI3Yy0zLjA2Ny0zLjA2Ni01LjQtNi41MjQtNy0xMC4zNzJTNS41LDMyLjc2Nyw1LjUsMjguNWMwLTQuMjI5LDAuODA5LTguMjk1LDIuNDI4LTEyLjINCgkJYzEuNjE5LTMuOTA1LDMuOTcyLTcuNCw3LjA1Ny0xMC40ODZDMjEuMDgtMC4zOTQsMjguNTY1LTMuNSwzNy40NDEtMy41eiBNMzcuNTU3LDIuMjcyYy03LjMxNCwwLTEzLjQ2NywyLjU1My0xOC40NTgsNy42NTcNCgkJYy0yLjUxNSwyLjU1My00LjQ0OCw1LjQxOS01LjgsOC42Yy0xLjM1NCwzLjE4MS0yLjAyOSw2LjUwNS0yLjAyOSw5Ljk3MmMwLDMuNDI5LDAuNjc1LDYuNzM0LDIuMDI5LDkuOTEzDQoJCWMxLjM1MywzLjE4MywzLjI4NSw2LjAyMSw1LjgsOC41MTZjMi41MTQsMi40OTYsNS4zNTEsNC4zOTksOC41MTUsNS43MTVjMy4xNjEsMS4zMTQsNi40NzYsMS45NzEsOS45NDMsMS45NzENCgkJYzMuNDI4LDAsNi43NS0wLjY2NSw5Ljk3My0xLjk5OWMzLjIxOS0xLjMzNSw2LjEyMS0zLjI1Nyw4LjcxMy01Ljc3MWM0Ljk5LTQuODc2LDcuNDg0LTEwLjk5LDcuNDg0LTE4LjM0NA0KCQljMC0zLjU0My0wLjY0OC02Ljg5NS0xLjk0My0xMC4wNTdjLTEuMjkzLTMuMTYyLTMuMTgtNS45OC01LjY1NC04LjQ1OEM1MC45ODQsNC44NDQsNDQuNzk1LDIuMjcyLDM3LjU1NywyLjI3MnogTTM3LjE1NiwyMy4xODcNCgkJbC00LjI4NywyLjIyOWMtMC40NTgtMC45NTEtMS4wMTktMS42MTktMS42ODUtMmMtMC42NjctMC4zOC0xLjI4Ni0wLjU3MS0xLjg1OC0wLjU3MWMtMi44NTYsMC00LjI4NiwxLjg4NS00LjI4Niw1LjY1Nw0KCQljMCwxLjcxNCwwLjM2MiwzLjA4NCwxLjA4NSw0LjExM2MwLjcyNCwxLjAyOSwxLjc5MSwxLjU0NCwzLjIwMSwxLjU0NGMxLjg2NywwLDMuMTgxLTAuOTE1LDMuOTQ0LTIuNzQzbDMuOTQyLDINCgkJYy0wLjgzOCwxLjU2My0yLDIuNzkxLTMuNDg2LDMuNjg2Yy0xLjQ4NCwwLjg5Ni0zLjEyMywxLjM0My00LjkxNCwxLjM0M2MtMi44NTcsMC01LjE2My0wLjg3NS02LjkxNS0yLjYyOQ0KCQljLTEuNzUyLTEuNzUyLTIuNjI4LTQuMTktMi42MjgtNy4zMTNjMC0zLjA0OCwwLjg4Ni01LjQ2NiwyLjY1Ny03LjI1N2MxLjc3MS0xLjc5LDQuMDA5LTIuNjg2LDYuNzE1LTIuNjg2DQoJCUMzMi42MDQsMTguNTU4LDM1LjQ0MSwyMC4xMDEsMzcuMTU2LDIzLjE4N3ogTTU1LjYxMywyMy4xODdsLTQuMjI5LDIuMjI5Yy0wLjQ1Ny0wLjk1MS0xLjAyLTEuNjE5LTEuNjg2LTINCgkJYy0wLjY2OC0wLjM4LTEuMzA3LTAuNTcxLTEuOTE0LTAuNTcxYy0yLjg1NywwLTQuMjg3LDEuODg1LTQuMjg3LDUuNjU3YzAsMS43MTQsMC4zNjMsMy4wODQsMS4wODYsNC4xMTMNCgkJYzAuNzIzLDEuMDI5LDEuNzg5LDEuNTQ0LDMuMjAxLDEuNTQ0YzEuODY1LDAsMy4xOC0wLjkxNSwzLjk0MS0yLjc0M2w0LDJjLTAuODc1LDEuNTYzLTIuMDU3LDIuNzkxLTMuNTQxLDMuNjg2DQoJCWMtMS40ODYsMC44OTYtMy4xMDUsMS4zNDMtNC44NTcsMS4zNDNjLTIuODk2LDAtNS4yMDktMC44NzUtNi45NDEtMi42MjljLTEuNzM2LTEuNzUyLTIuNjAyLTQuMTktMi42MDItNy4zMTMNCgkJYzAtMy4wNDgsMC44ODUtNS40NjYsMi42NTgtNy4yNTdjMS43Ny0xLjc5LDQuMDA4LTIuNjg2LDYuNzEzLTIuNjg2QzUxLjExNywxOC41NTgsNTMuOTM4LDIwLjEwMSw1NS42MTMsMjMuMTg3eiIvPg0KPC9nPg0KPC9zdmc+DQo=" class="img-fluid" width="20"><img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAxMy4wLjIsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDE0OTQ4KSAgLS0+DQo8IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDEuMC8vRU4iICJodHRwOi8vd3d3LnczLm9yZy9UUi8yMDAxL1JFQy1TVkctMjAwMTA5MDQvRFREL3N2ZzEwLmR0ZCI+DQo8c3ZnIHZlcnNpb249IjEuMCIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4Ig0KCSB3aWR0aD0iNjRweCIgaGVpZ2h0PSI2NHB4IiB2aWV3Qm94PSI1LjUgLTMuNSA2NCA2NCIgZW5hYmxlLWJhY2tncm91bmQ9Im5ldyA1LjUgLTMuNSA2NCA2NCIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+DQo8Zz4NCgk8Y2lyY2xlIGZpbGw9IiNGRkZGRkYiIGN4PSIzNy42MzciIGN5PSIyOC44MDYiIHI9IjI4LjI3NiIvPg0KCTxnPg0KCQk8cGF0aCBkPSJNMzcuNDQzLTMuNWM4Ljk4OCwwLDE2LjU3LDMuMDg1LDIyLjc0Miw5LjI1N0M2Ni4zOTMsMTEuOTY3LDY5LjUsMTkuNTQ4LDY5LjUsMjguNWMwLDguOTkxLTMuMDQ5LDE2LjQ3Ni05LjE0NSwyMi40NTYNCgkJCUM1My44NzksNTcuMzE5LDQ2LjI0Miw2MC41LDM3LjQ0Myw2MC41Yy04LjY0OSwwLTE2LjE1My0zLjE0NC0yMi41MTQtOS40M0M4LjY0NCw0NC43ODQsNS41LDM3LjI2Miw1LjUsMjguNQ0KCQkJYzAtOC43NjEsMy4xNDQtMTYuMzQyLDkuNDI5LTIyLjc0MkMyMS4xMDEtMC40MTUsMjguNjA0LTMuNSwzNy40NDMtMy41eiBNMzcuNTU3LDIuMjcyYy03LjI3NiwwLTEzLjQyOCwyLjU1My0xOC40NTcsNy42NTcNCgkJCWMtNS4yMiw1LjMzNC03LjgyOSwxMS41MjUtNy44MjksMTguNTcyYzAsNy4wODYsMi41OSwxMy4yMiw3Ljc3LDE4LjM5OGM1LjE4MSw1LjE4MiwxMS4zNTIsNy43NzEsMTguNTE0LDcuNzcxDQoJCQljNy4xMjMsMCwxMy4zMzQtMi42MDcsMTguNjI5LTcuODI4YzUuMDI5LTQuODM4LDcuNTQzLTEwLjk1Miw3LjU0My0xOC4zNDNjMC03LjI3Ni0yLjU1My0xMy40NjUtNy42NTYtMTguNTcxDQoJCQlDNTAuOTY3LDQuODI0LDQ0Ljc5NSwyLjI3MiwzNy41NTcsMi4yNzJ6IE00Ni4xMjksMjAuNTU3djEzLjA4NWgtMy42NTZ2MTUuNTQyaC05Ljk0NFYzMy42NDNoLTMuNjU2VjIwLjU1Nw0KCQkJYzAtMC41NzIsMC4yLTEuMDU3LDAuNTk5LTEuNDU3YzAuNDAxLTAuMzk5LDAuODg3LTAuNiwxLjQ1Ny0wLjZoMTMuMTQ0YzAuNTMzLDAsMS4wMSwwLjIsMS40MjgsMC42DQoJCQlDNDUuOTE4LDE5LjUsNDYuMTI5LDE5Ljk4Niw0Ni4xMjksMjAuNTU3eiBNMzMuMDQyLDEyLjMyOWMwLTMuMDA4LDEuNDg1LTQuNTE0LDQuNDU4LTQuNTE0czQuNDU3LDEuNTA0LDQuNDU3LDQuNTE0DQoJCQljMCwyLjk3MS0xLjQ4Niw0LjQ1Ny00LjQ1Nyw0LjQ1N1MzMy4wNDIsMTUuMywzMy4wNDIsMTIuMzI5eiIvPg0KCTwvZz4NCjwvZz4NCjwvc3ZnPg0K" class="img-fluid" width="20"><img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAxMy4wLjIsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDE0OTQ4KSAgLS0+DQo8IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDEuMC8vRU4iICJodHRwOi8vd3d3LnczLm9yZy9UUi8yMDAxL1JFQy1TVkctMjAwMTA5MDQvRFREL3N2ZzEwLmR0ZCI+DQo8c3ZnIHZlcnNpb249IjEuMCIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4Ig0KCSB3aWR0aD0iNjRweCIgaGVpZ2h0PSI2NHB4IiB2aWV3Qm94PSI1LjUgLTMuNSA2NCA2NCIgZW5hYmxlLWJhY2tncm91bmQ9Im5ldyA1LjUgLTMuNSA2NCA2NCIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+DQo8Zz4NCgk8Y2lyY2xlIGZpbGw9IiNGRkZGRkYiIGN4PSIzNy40NyIgY3k9IjI4LjczNiIgcj0iMjkuNDcxIi8+DQoJPGc+DQoJCTxwYXRoIGQ9Ik0zNy40NDItMy41YzguOTksMCwxNi41NzEsMy4wODUsMjIuNzQzLDkuMjU2QzY2LjM5MywxMS45MjgsNjkuNSwxOS41MDksNjkuNSwyOC41YzAsOC45OTItMy4wNDgsMTYuNDc2LTkuMTQ1LDIyLjQ1OA0KCQkJQzUzLjg4LDU3LjMyLDQ2LjI0MSw2MC41LDM3LjQ0Miw2MC41Yy04LjY4NiwwLTE2LjE5LTMuMTYyLTIyLjUxMy05LjQ4NUM4LjY0NCw0NC43MjgsNS41LDM3LjIyNSw1LjUsMjguNQ0KCQkJYzAtOC43NjIsMy4xNDQtMTYuMzQzLDkuNDI5LTIyLjc0M0MyMS4xLTAuNDE0LDI4LjYwNC0zLjUsMzcuNDQyLTMuNXogTTEyLjcsMTkuODcyYy0wLjk1MiwyLjYyOC0xLjQyOSw1LjUwNS0xLjQyOSw4LjYyOQ0KCQkJYzAsNy4wODYsMi41OSwxMy4yMiw3Ljc3LDE4LjRjNS4yMTksNS4xNDQsMTEuMzkxLDcuNzE1LDE4LjUxNCw3LjcxNWM3LjIwMSwwLDEzLjQwOS0yLjYwOCwxOC42My03LjgyOQ0KCQkJYzEuODY3LTEuNzksMy4zMzItMy42NTcsNC4zOTgtNS42MDJsLTEyLjA1Ni01LjM3MWMtMC40MjEsMi4wMi0xLjQzOSwzLjY2Ny0zLjA1Nyw0Ljk0MmMtMS42MjIsMS4yNzYtMy41MzUsMi4wMTEtNS43NDQsMi4yDQoJCQl2NC45MTVoLTMuNzE0di00LjkxNWMtMy41NDMtMC4wMzYtNi43ODItMS4zMTItOS43MTQtMy44MjdsNC40LTQuNDU3YzIuMDk0LDEuOTQyLDQuNDc2LDIuOTEzLDcuMTQzLDIuOTEzDQoJCQljMS4xMDQsMCwyLjA0OC0wLjI0NiwyLjgzLTAuNzQzYzAuNzgtMC40OTQsMS4xNzItMS4zMTIsMS4xNzItMi40NTdjMC0wLjgwMS0wLjI4Ny0xLjQ0OC0wLjg1OC0xLjk0M2wtMy4wODUtMS4zMTVsLTMuNzcxLTEuNzE1DQoJCQlsLTUuMDg2LTIuMjI5TDEyLjcsMTkuODcyeiBNMzcuNTU3LDIuMjE0Yy03LjI3NiwwLTEzLjQyOCwyLjU3MS0xOC40NTcsNy43MTRjLTEuMjU4LDEuMjU4LTIuNDM5LDIuNjg2LTMuNTQzLDQuMjg3TDI3Ljc4NiwxOS43DQoJCQljMC41MzMtMS42NzYsMS41NDItMy4wMTksMy4wMjktNC4wMjhjMS40ODQtMS4wMDksMy4yMTgtMS41NzEsNS4yLTEuNjg2VjkuMDcxaDMuNzE1djQuOTE1YzIuOTM0LDAuMTUzLDUuNiwxLjE0Myw4LDIuOTcxDQoJCQlsLTQuMTcyLDQuMjg2Yy0xLjc5My0xLjI1Ny0zLjYxOS0xLjg4NS01LjQ4Ni0xLjg4NWMtMC45OTEsMC0xLjg3NiwwLjE5MS0yLjY1NiwwLjU3MWMtMC43ODEsMC4zODEtMS4xNzIsMS4wMjktMS4xNzIsMS45NDMNCgkJCWMwLDAuMjY3LDAuMDk1LDAuNTMzLDAuMjg1LDAuOGw0LjA1NywxLjgzbDIuOCwxLjI1N2w1LjE0NCwyLjI4NWwxNi4zOTcsNy4zMTRjMC41MzUtMi4yNDgsMC44MDEtNC41MzMsMC44MDEtNi44NTcNCgkJCWMwLTcuMzUzLTIuNTUyLTEzLjU0My03LjY1Ni0xOC41NzNDNTEuMDA1LDQuNzg1LDQ0LjgzMSwyLjIxNCwzNy41NTcsMi4yMTR6Ii8+DQoJPC9nPg0KPC9nPg0KPC9zdmc+DQo=" class="img-fluid" width="20"></span></p>
+<section id="unión-de-datasets" class="level2">
+<h2 class="anchored" data-anchor-id="unión-de-datasets">Unión de datasets</h2>
+<p>En el ejercicio práctico de una clase anterior aprendimos que podíamos unir dos bases por sus columnas en común mediante el comando <code>left_join()</code> del paquete <code>dplyr</code>, incluido dentro de <code>tidyverse</code>. En esta clase exploraremos más a fondo este comando y otras opciones que trae <code>dplyr</code> para unir datasets.</p>
+<p>Comencemos por cargar los paquetes necesarios:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Carga paquetes</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  tmap,</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  sf,</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  rio,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  janitor,</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  tidyverse</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Veremos la utilidad de los paquetes <code>sf</code> y <code>tmap</code> más adelante en esta lección. Comencemos por cargar y limpiar la base con los datos de pacientes:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Datos pacientes</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>pacientes_clean <span class="ot">&lt;-</span> <span class="fu">import</span>(<span class="st">"../raw/base_pacientes.xlsx"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># estandariza nombres de columnas</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">clean_names</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># renombra columnas manualmente</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">depto_residencia =</span> depto_r,</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>         <span class="at">depto_muestra =</span> depto_m,</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>         <span class="at">provincia_residencia =</span> provincia_resid) <span class="sc">|&gt;</span> </span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="co"># filtra datos de otras provincias</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(depto_residencia)) <span class="sc">|&gt;</span> </span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  <span class="co"># filtra registros sin edad y sexo</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(sexo) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(edad_diagnostico)) <span class="sc">|&gt;</span> </span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>  <span class="co"># corrige nombre provincia</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">provincia_residencia =</span> <span class="st">"Santa Fe"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>  <span class="co"># cambia etiquetas sexo</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">sexo =</span> <span class="fu">if_else</span>(sexo <span class="sc">==</span> <span class="st">"M"</span>, <span class="st">"masculino"</span>, <span class="st">"femenino"</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>  <span class="co"># cambia formato de fechas</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">fecha_toma_muestra =</span> <span class="fu">dmy</span>(fecha_toma_muestra)) <span class="sc">|&gt;</span> </span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Crea nuevas columnas</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>  <span class="co"># año toma de muestra</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">anio_toma_muestra =</span> <span class="fu">year</span>(fecha_toma_muestra)) <span class="sc">|&gt;</span> </span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>  <span class="co"># semana epidemiológica</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">semana_toma_muestra =</span> <span class="fu">epiweek</span>(fecha_toma_muestra)) <span class="sc">|&gt;</span> </span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>  <span class="co"># edad en años</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">edad_anios =</span> <span class="fu">case_when</span>(</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>    tipo_edad_diagnostico<span class="sc">==</span><span class="st">"MESES"</span> <span class="sc">~</span> edad_diagnostico<span class="sc">/</span><span class="dv">12</span>,</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>    grupo_edad <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"&lt;= 1 AÑO"</span>) <span class="sc">~</span> edad_diagnostico<span class="sc">/</span><span class="dv">12</span>,</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>    <span class="cn">TRUE</span> <span class="sc">~</span> edad_diagnostico)) <span class="sc">|&gt;</span> </span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>  <span class="co"># ordena columnas</span></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(id_paciente, sexo, edad_anios, <span class="fu">contains</span>(<span class="st">"resid"</span>),</span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>         <span class="fu">contains</span>(<span class="st">"muest"</span>), internado) <span class="sc">|&gt;</span> </span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>  <span class="co"># limpia duplicados</span></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Ahora hacemos lo mismo con la base de los síntomas y la de los resultados de laboratorio:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Datos síntomas</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>sintomas_clean <span class="ot">&lt;-</span> <span class="fu">import</span>(<span class="st">"../raw/base_sintomas.csv"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># estandariza nombres de columnas</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">clean_names</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># renombra manualmente columnas</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">sexo =</span> genero,</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">fecha_toma_muestra =</span> ftm,</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">nauseas_vomitos =</span> nauseasyvomitos,</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">dolor_pantorrillas =</span> dolor_de_pantorrillas,</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">estado_gripal =</span> gripal</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>  <span class="co"># corrige formato fechas</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">fecha_toma_muestra =</span> <span class="fu">dmy</span>(fecha_toma_muestra)) <span class="sc">|&gt;</span> </span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>  <span class="co"># cambia etiquetas sexo</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">sexo =</span> <span class="fu">if_else</span>(sexo <span class="sc">==</span> <span class="st">"M"</span>, <span class="st">"masculino"</span>, <span class="st">"femenino"</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>  <span class="co"># corrige valores faltantes</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">where</span>(is.character), </span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>                <span class="at">.fns =</span> <span class="sc">~</span> <span class="fu">na_if</span>(.x, <span class="st">""</span>))) <span class="sc">|&gt;</span> </span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>  <span class="co"># limpia duplicados</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>()</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="do">## Datos laboratorio</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>laboratorio_clean <span class="ot">&lt;-</span> <span class="fu">import</span>(<span class="st">"../raw/base_lab.xlsx"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>  <span class="co"># estandariza nombre de columnas</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">clean_names</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>  <span class="co"># renombra manualmente columnas</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">id_paciente =</span> id_pte) <span class="sc">|&gt;</span> </span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>  <span class="co"># corrige formato fechas</span></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">fecha_inicio_sintomas =</span> <span class="fu">convert_to_date</span>(fecha_inicio_sintomas)) <span class="sc">|&gt;</span> </span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Crea nuevas variables</span></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>  <span class="co"># año inicio síntomas</span></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">anio_inicio_sintomas =</span> <span class="fu">year</span>(fecha_inicio_sintomas)) <span class="sc">|&gt;</span> </span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>  <span class="co"># semana epidemiológica</span></span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">semana_inicio_sintomas =</span> <span class="fu">epiweek</span>(fecha_inicio_sintomas)) <span class="sc">|&gt;</span> </span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a>  <span class="co"># recategoriza resultado</span></span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">resultado_cat =</span> <span class="fu">if_else</span>(<span class="fu">grepl</span>(<span class="st">"CONF"</span>, resultado),</span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a>                                 <span class="st">"POS"</span>, <span class="st">"NEG"</span>),</span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a>         </span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a>         <span class="at">resultado_tipo =</span> <span class="fu">case_when</span>(<span class="fu">grepl</span>(<span class="st">"CONF|PROB"</span>, resultado) <span class="sc">~</span> <span class="dv">1</span>,</span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a>                                    <span class="cn">TRUE</span> <span class="sc">~</span> <span class="dv">0</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a>  <span class="co"># limpia duplicados</span></span>
+<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="comando-left_join" class="level3">
+<h3 class="anchored" data-anchor-id="comando-left_join">Comando <code>left_join()</code></h3>
+<p>Retorna todas las filas de la base X (la base de la izquierda) y las filas de la base Y que coinciden con las de la base X. Si no hay coincidencia, las filas de la base X se mantienen y los valores de la base Y se llenan con <code>NA</code>.</p>
+<p>En el caso de nuestros datos:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Une bases</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>base_left <span class="ot">&lt;-</span> <span class="fu">left_join</span>(pacientes_clean, sintomas_clean)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Joining with `by = join_by(id_paciente, sexo, fecha_toma_muestra)`</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Chequea número de filas y columnas</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(pacientes_clean)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 735
+Columns: 10
+$ id_paciente          &lt;chr&gt; "895db5c1", "8a7605a7", "155d5cab", "e12b7021", "…
+$ sexo                 &lt;chr&gt; "masculino", "femenino", "masculino", "masculino"…
+$ edad_anios           &lt;dbl&gt; 24.0, 26.0, 55.0, 51.0, 27.0, 61.0, 27.0, 62.0, 4…
+$ depto_residencia     &lt;chr&gt; "CONSTITUCION", "SAN JAVIER", "GENERAL OBLIGADO",…
+$ provincia_residencia &lt;chr&gt; "Santa Fe", "Santa Fe", "Santa Fe", "Santa Fe", "…
+$ depto_muestra        &lt;chr&gt; "ROSARIO", "LA CAPITAL", "GENERAL OBLIGADO", "ROS…
+$ fecha_toma_muestra   &lt;date&gt; 2013-06-01, 2014-01-04, 2014-04-22, 2015-01-17, …
+$ anio_toma_muestra    &lt;dbl&gt; 2013, 2014, 2014, 2015, 2014, 2016, 2016, 2013, 2…
+$ semana_toma_muestra  &lt;dbl&gt; 22, 1, 17, 2, 24, 26, 34, 35, 49, 27, 17, 38, 11,…
+$ internado            &lt;chr&gt; "SI", "SI", "NO", "NO", "NO", "NO", "NO", "NO", "…</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(sintomas_clean)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 750
+Columns: 15
+$ id_paciente        &lt;chr&gt; "895db5c1", "8a7605a7", "155d5cab", "e12b7021", "63…
+$ sexo               &lt;chr&gt; "masculino", "femenino", "masculino", "masculino", …
+$ fecha_toma_muestra &lt;date&gt; 2013-06-01, 2014-01-04, 2014-04-22, 2015-01-17, 20…
+$ fiebre             &lt;chr&gt; "Si", "No", "No", "No", "No", "Si", "Si", "Si", "Si…
+$ cefalea            &lt;chr&gt; "No", "Si", "No", "No", "No", "No", "No", "Si", "Si…
+$ mialgia            &lt;chr&gt; "No", "No", NA, "No", "No", "No", "No", "Si", "No",…
+$ nauseas_vomitos    &lt;chr&gt; "Si", "Si", "No", "No", "No", "Si", NA, "No", "No",…
+$ diarrea            &lt;chr&gt; "No", "No", "No", "No", "No", "No", "Si", "No", "No…
+$ malestar           &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "Si…
+$ cansancio          &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "No…
+$ hemorragia         &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "No…
+$ ictericia          &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "No…
+$ dolor_pantorrillas &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "No…
+$ estado_gripal      &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "No…
+$ mareos             &lt;chr&gt; "No", "No", "No", "No", "No", "Si", "No", "No", "No…</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(base_left)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 735
+Columns: 22
+$ id_paciente          &lt;chr&gt; "895db5c1", "8a7605a7", "155d5cab", "e12b7021", "…
+$ sexo                 &lt;chr&gt; "masculino", "femenino", "masculino", "masculino"…
+$ edad_anios           &lt;dbl&gt; 24.0, 26.0, 55.0, 51.0, 27.0, 61.0, 27.0, 62.0, 4…
+$ depto_residencia     &lt;chr&gt; "CONSTITUCION", "SAN JAVIER", "GENERAL OBLIGADO",…
+$ provincia_residencia &lt;chr&gt; "Santa Fe", "Santa Fe", "Santa Fe", "Santa Fe", "…
+$ depto_muestra        &lt;chr&gt; "ROSARIO", "LA CAPITAL", "GENERAL OBLIGADO", "ROS…
+$ fecha_toma_muestra   &lt;date&gt; 2013-06-01, 2014-01-04, 2014-04-22, 2015-01-17, …
+$ anio_toma_muestra    &lt;dbl&gt; 2013, 2014, 2014, 2015, 2014, 2016, 2016, 2013, 2…
+$ semana_toma_muestra  &lt;dbl&gt; 22, 1, 17, 2, 24, 26, 34, 35, 49, 27, 17, 38, 11,…
+$ internado            &lt;chr&gt; "SI", "SI", "NO", "NO", "NO", "NO", "NO", "NO", "…
+$ fiebre               &lt;chr&gt; "Si", "No", "No", "No", "No", "Si", "Si", "Si", "…
+$ cefalea              &lt;chr&gt; "No", "Si", "No", "No", "No", "No", "No", "Si", "…
+$ mialgia              &lt;chr&gt; "No", "No", NA, "No", "No", "No", "No", "Si", "No…
+$ nauseas_vomitos      &lt;chr&gt; "Si", "Si", "No", "No", "No", "Si", NA, "No", "No…
+$ diarrea              &lt;chr&gt; "No", "No", "No", "No", "No", "No", "Si", "No", "…
+$ malestar             &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "…
+$ cansancio            &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "…
+$ hemorragia           &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "…
+$ ictericia            &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "…
+$ dolor_pantorrillas   &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "…
+$ estado_gripal        &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "…
+$ mareos               &lt;chr&gt; "No", "No", "No", "No", "No", "Si", "No", "No", "…</code></pre>
+</div>
+</div>
+<p>Cuando unimos con <code>left_join()</code> se mantienen todas las filas de la base <code>pacientes_clean</code> y se descartan las filas de <code>sintomas_clean</code> que no coinciden con los valores de la columna en común <code>id_paciente</code>, <code>sexo</code> y <code>fecha_toma_muestra</code>.</p>
+<p>También puedo especificar por cuales columnas en común quiero unir los datos y en este caso las columnas duplicadas se diferenciarán por los sufijos <code>.x</code> y <code>.y</code>. Esto es útil cuando suponemos que puede haber errores de carga en alguna de las bases que no permiten que el <em>join</em> se realice correctamente.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Une bases</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>base_left <span class="ot">&lt;-</span> <span class="fu">left_join</span>(pacientes_clean, sintomas_clean,</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>                       <span class="at">by =</span> <span class="st">"id_paciente"</span>)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Chequea número de filas y columnas base unida</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(base_left)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 735
+Columns: 24
+$ id_paciente          &lt;chr&gt; "895db5c1", "8a7605a7", "155d5cab", "e12b7021", "…
+$ sexo.x               &lt;chr&gt; "masculino", "femenino", "masculino", "masculino"…
+$ edad_anios           &lt;dbl&gt; 24.0, 26.0, 55.0, 51.0, 27.0, 61.0, 27.0, 62.0, 4…
+$ depto_residencia     &lt;chr&gt; "CONSTITUCION", "SAN JAVIER", "GENERAL OBLIGADO",…
+$ provincia_residencia &lt;chr&gt; "Santa Fe", "Santa Fe", "Santa Fe", "Santa Fe", "…
+$ depto_muestra        &lt;chr&gt; "ROSARIO", "LA CAPITAL", "GENERAL OBLIGADO", "ROS…
+$ fecha_toma_muestra.x &lt;date&gt; 2013-06-01, 2014-01-04, 2014-04-22, 2015-01-17, …
+$ anio_toma_muestra    &lt;dbl&gt; 2013, 2014, 2014, 2015, 2014, 2016, 2016, 2013, 2…
+$ semana_toma_muestra  &lt;dbl&gt; 22, 1, 17, 2, 24, 26, 34, 35, 49, 27, 17, 38, 11,…
+$ internado            &lt;chr&gt; "SI", "SI", "NO", "NO", "NO", "NO", "NO", "NO", "…
+$ sexo.y               &lt;chr&gt; "masculino", "femenino", "masculino", "masculino"…
+$ fecha_toma_muestra.y &lt;date&gt; 2013-06-01, 2014-01-04, 2014-04-22, 2015-01-17, …
+$ fiebre               &lt;chr&gt; "Si", "No", "No", "No", "No", "Si", "Si", "Si", "…
+$ cefalea              &lt;chr&gt; "No", "Si", "No", "No", "No", "No", "No", "Si", "…
+$ mialgia              &lt;chr&gt; "No", "No", NA, "No", "No", "No", "No", "Si", "No…
+$ nauseas_vomitos      &lt;chr&gt; "Si", "Si", "No", "No", "No", "Si", NA, "No", "No…
+$ diarrea              &lt;chr&gt; "No", "No", "No", "No", "No", "No", "Si", "No", "…
+$ malestar             &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "…
+$ cansancio            &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "…
+$ hemorragia           &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "…
+$ ictericia            &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "…
+$ dolor_pantorrillas   &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "…
+$ estado_gripal        &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "…
+$ mareos               &lt;chr&gt; "No", "No", "No", "No", "No", "Si", "No", "No", "…</code></pre>
+</div>
+</div>
+</section>
+<section id="comando-right_join" class="level3">
+<h3 class="anchored" data-anchor-id="comando-right_join">Comando <code>right_join()</code></h3>
+<p>Retorna todas las filas de la base Y (la base de la derecha) y las filas de la base X que coinciden con las de la base Y. Si no hay coincidencia, las filas de la base Y se mantienen y los valores de la base X se llenan con <code>NA</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Une bases</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>base_right <span class="ot">&lt;-</span> <span class="fu">right_join</span>(pacientes_clean, sintomas_clean)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Joining with `by = join_by(id_paciente, sexo, fecha_toma_muestra)`</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Chequea número de filas y columnas</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(pacientes_clean)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 735
+Columns: 10
+$ id_paciente          &lt;chr&gt; "895db5c1", "8a7605a7", "155d5cab", "e12b7021", "…
+$ sexo                 &lt;chr&gt; "masculino", "femenino", "masculino", "masculino"…
+$ edad_anios           &lt;dbl&gt; 24.0, 26.0, 55.0, 51.0, 27.0, 61.0, 27.0, 62.0, 4…
+$ depto_residencia     &lt;chr&gt; "CONSTITUCION", "SAN JAVIER", "GENERAL OBLIGADO",…
+$ provincia_residencia &lt;chr&gt; "Santa Fe", "Santa Fe", "Santa Fe", "Santa Fe", "…
+$ depto_muestra        &lt;chr&gt; "ROSARIO", "LA CAPITAL", "GENERAL OBLIGADO", "ROS…
+$ fecha_toma_muestra   &lt;date&gt; 2013-06-01, 2014-01-04, 2014-04-22, 2015-01-17, …
+$ anio_toma_muestra    &lt;dbl&gt; 2013, 2014, 2014, 2015, 2014, 2016, 2016, 2013, 2…
+$ semana_toma_muestra  &lt;dbl&gt; 22, 1, 17, 2, 24, 26, 34, 35, 49, 27, 17, 38, 11,…
+$ internado            &lt;chr&gt; "SI", "SI", "NO", "NO", "NO", "NO", "NO", "NO", "…</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(sintomas_clean)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 750
+Columns: 15
+$ id_paciente        &lt;chr&gt; "895db5c1", "8a7605a7", "155d5cab", "e12b7021", "63…
+$ sexo               &lt;chr&gt; "masculino", "femenino", "masculino", "masculino", …
+$ fecha_toma_muestra &lt;date&gt; 2013-06-01, 2014-01-04, 2014-04-22, 2015-01-17, 20…
+$ fiebre             &lt;chr&gt; "Si", "No", "No", "No", "No", "Si", "Si", "Si", "Si…
+$ cefalea            &lt;chr&gt; "No", "Si", "No", "No", "No", "No", "No", "Si", "Si…
+$ mialgia            &lt;chr&gt; "No", "No", NA, "No", "No", "No", "No", "Si", "No",…
+$ nauseas_vomitos    &lt;chr&gt; "Si", "Si", "No", "No", "No", "Si", NA, "No", "No",…
+$ diarrea            &lt;chr&gt; "No", "No", "No", "No", "No", "No", "Si", "No", "No…
+$ malestar           &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "Si…
+$ cansancio          &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "No…
+$ hemorragia         &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "No…
+$ ictericia          &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "No…
+$ dolor_pantorrillas &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "No…
+$ estado_gripal      &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "No…
+$ mareos             &lt;chr&gt; "No", "No", "No", "No", "No", "Si", "No", "No", "No…</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(base_right)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 750
+Columns: 22
+$ id_paciente          &lt;chr&gt; "895db5c1", "8a7605a7", "155d5cab", "e12b7021", "…
+$ sexo                 &lt;chr&gt; "masculino", "femenino", "masculino", "masculino"…
+$ edad_anios           &lt;dbl&gt; 24.0, 26.0, 55.0, 51.0, 27.0, 61.0, 27.0, 62.0, 4…
+$ depto_residencia     &lt;chr&gt; "CONSTITUCION", "SAN JAVIER", "GENERAL OBLIGADO",…
+$ provincia_residencia &lt;chr&gt; "Santa Fe", "Santa Fe", "Santa Fe", "Santa Fe", "…
+$ depto_muestra        &lt;chr&gt; "ROSARIO", "LA CAPITAL", "GENERAL OBLIGADO", "ROS…
+$ fecha_toma_muestra   &lt;date&gt; 2013-06-01, 2014-01-04, 2014-04-22, 2015-01-17, …
+$ anio_toma_muestra    &lt;dbl&gt; 2013, 2014, 2014, 2015, 2014, 2016, 2016, 2013, 2…
+$ semana_toma_muestra  &lt;dbl&gt; 22, 1, 17, 2, 24, 26, 34, 35, 49, 27, 17, 38, 11,…
+$ internado            &lt;chr&gt; "SI", "SI", "NO", "NO", "NO", "NO", "NO", "NO", "…
+$ fiebre               &lt;chr&gt; "Si", "No", "No", "No", "No", "Si", "Si", "Si", "…
+$ cefalea              &lt;chr&gt; "No", "Si", "No", "No", "No", "No", "No", "Si", "…
+$ mialgia              &lt;chr&gt; "No", "No", NA, "No", "No", "No", "No", "Si", "No…
+$ nauseas_vomitos      &lt;chr&gt; "Si", "Si", "No", "No", "No", "Si", NA, "No", "No…
+$ diarrea              &lt;chr&gt; "No", "No", "No", "No", "No", "No", "Si", "No", "…
+$ malestar             &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "…
+$ cansancio            &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "…
+$ hemorragia           &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "…
+$ ictericia            &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "…
+$ dolor_pantorrillas   &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "…
+$ estado_gripal        &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "…
+$ mareos               &lt;chr&gt; "No", "No", "No", "No", "No", "Si", "No", "No", "…</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Chequeo NAs</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">tabyl</span>(base_right<span class="sc">$</span>depto_residencia)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> base_right$depto_residencia   n     percent valid_percent
+                  9 DE JULIO   4 0.005333333   0.005442177
+                    BELGRANO   2 0.002666667   0.002721088
+                     CASEROS  20 0.026666667   0.027210884
+                 CASTELLANOS  15 0.020000000   0.020408163
+                CONSTITUCION  16 0.021333333   0.021768707
+                       GARAY   6 0.008000000   0.008163265
+               GENERAL LOPEZ  16 0.021333333   0.021768707
+            GENERAL OBLIGADO  53 0.070666667   0.072108844
+                     IRIONDO  11 0.014666667   0.014965986
+                  LA CAPITAL 189 0.252000000   0.257142857
+                LAS COLONIAS  13 0.017333333   0.017687075
+                     ROSARIO 270 0.360000000   0.367346939
+               SAN CRISTOBAL   2 0.002666667   0.002721088
+                  SAN JAVIER  40 0.053333333   0.054421769
+                SAN JERONIMO  11 0.014666667   0.014965986
+                   SAN JUSTO  10 0.013333333   0.013605442
+                 SAN LORENZO  17 0.022666667   0.023129252
+                  SAN MARTIN   7 0.009333333   0.009523810
+                        VERA  33 0.044000000   0.044897959
+                        &lt;NA&gt;  15 0.020000000            NA</code></pre>
+</div>
+</div>
+<p>La base nos muestra que hay 15 valores ausentes para <code>depto_residencia</code>, correspondientes a los registros que no pudieron unirse.</p>
+</section>
+<section id="comando-inner_join" class="level3">
+<h3 class="anchored" data-anchor-id="comando-inner_join">Comando <code>inner_join()</code></h3>
+<p>Retorna todas las filas de ambas bases que tienen valores coincidentes en las columnas especificadas. Si una fila en la base X no tiene una coincidencia en la base Y, esa fila no se incluye en el resultado, y viceversa.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Une bases</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>base_inner <span class="ot">&lt;-</span> <span class="fu">inner_join</span>(pacientes_clean, sintomas_clean)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Joining with `by = join_by(id_paciente, sexo, fecha_toma_muestra)`</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Chequea número de filas y columnas</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(base_inner)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 735
+Columns: 22
+$ id_paciente          &lt;chr&gt; "895db5c1", "8a7605a7", "155d5cab", "e12b7021", "…
+$ sexo                 &lt;chr&gt; "masculino", "femenino", "masculino", "masculino"…
+$ edad_anios           &lt;dbl&gt; 24.0, 26.0, 55.0, 51.0, 27.0, 61.0, 27.0, 62.0, 4…
+$ depto_residencia     &lt;chr&gt; "CONSTITUCION", "SAN JAVIER", "GENERAL OBLIGADO",…
+$ provincia_residencia &lt;chr&gt; "Santa Fe", "Santa Fe", "Santa Fe", "Santa Fe", "…
+$ depto_muestra        &lt;chr&gt; "ROSARIO", "LA CAPITAL", "GENERAL OBLIGADO", "ROS…
+$ fecha_toma_muestra   &lt;date&gt; 2013-06-01, 2014-01-04, 2014-04-22, 2015-01-17, …
+$ anio_toma_muestra    &lt;dbl&gt; 2013, 2014, 2014, 2015, 2014, 2016, 2016, 2013, 2…
+$ semana_toma_muestra  &lt;dbl&gt; 22, 1, 17, 2, 24, 26, 34, 35, 49, 27, 17, 38, 11,…
+$ internado            &lt;chr&gt; "SI", "SI", "NO", "NO", "NO", "NO", "NO", "NO", "…
+$ fiebre               &lt;chr&gt; "Si", "No", "No", "No", "No", "Si", "Si", "Si", "…
+$ cefalea              &lt;chr&gt; "No", "Si", "No", "No", "No", "No", "No", "Si", "…
+$ mialgia              &lt;chr&gt; "No", "No", NA, "No", "No", "No", "No", "Si", "No…
+$ nauseas_vomitos      &lt;chr&gt; "Si", "Si", "No", "No", "No", "Si", NA, "No", "No…
+$ diarrea              &lt;chr&gt; "No", "No", "No", "No", "No", "No", "Si", "No", "…
+$ malestar             &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "…
+$ cansancio            &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "…
+$ hemorragia           &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "…
+$ ictericia            &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "…
+$ dolor_pantorrillas   &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "…
+$ estado_gripal        &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "…
+$ mareos               &lt;chr&gt; "No", "No", "No", "No", "No", "Si", "No", "No", "…</code></pre>
+</div>
+</div>
+</section>
+<section id="comando-full_join" class="level3">
+<h3 class="anchored" data-anchor-id="comando-full_join">Comando <code>full_join()</code></h3>
+<p>Retorna todas las filas de ambas bases, uniendo las que coinciden y llenando con <code>NA</code> donde no hay coincidencias.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Une bases</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>base_full <span class="ot">&lt;-</span> <span class="fu">full_join</span>(pacientes_clean, sintomas_clean)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Joining with `by = join_by(id_paciente, sexo, fecha_toma_muestra)`</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Chequea número de filas y columnas</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(base_full)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 750
+Columns: 22
+$ id_paciente          &lt;chr&gt; "895db5c1", "8a7605a7", "155d5cab", "e12b7021", "…
+$ sexo                 &lt;chr&gt; "masculino", "femenino", "masculino", "masculino"…
+$ edad_anios           &lt;dbl&gt; 24.0, 26.0, 55.0, 51.0, 27.0, 61.0, 27.0, 62.0, 4…
+$ depto_residencia     &lt;chr&gt; "CONSTITUCION", "SAN JAVIER", "GENERAL OBLIGADO",…
+$ provincia_residencia &lt;chr&gt; "Santa Fe", "Santa Fe", "Santa Fe", "Santa Fe", "…
+$ depto_muestra        &lt;chr&gt; "ROSARIO", "LA CAPITAL", "GENERAL OBLIGADO", "ROS…
+$ fecha_toma_muestra   &lt;date&gt; 2013-06-01, 2014-01-04, 2014-04-22, 2015-01-17, …
+$ anio_toma_muestra    &lt;dbl&gt; 2013, 2014, 2014, 2015, 2014, 2016, 2016, 2013, 2…
+$ semana_toma_muestra  &lt;dbl&gt; 22, 1, 17, 2, 24, 26, 34, 35, 49, 27, 17, 38, 11,…
+$ internado            &lt;chr&gt; "SI", "SI", "NO", "NO", "NO", "NO", "NO", "NO", "…
+$ fiebre               &lt;chr&gt; "Si", "No", "No", "No", "No", "Si", "Si", "Si", "…
+$ cefalea              &lt;chr&gt; "No", "Si", "No", "No", "No", "No", "No", "Si", "…
+$ mialgia              &lt;chr&gt; "No", "No", NA, "No", "No", "No", "No", "Si", "No…
+$ nauseas_vomitos      &lt;chr&gt; "Si", "Si", "No", "No", "No", "Si", NA, "No", "No…
+$ diarrea              &lt;chr&gt; "No", "No", "No", "No", "No", "No", "Si", "No", "…
+$ malestar             &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "…
+$ cansancio            &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "…
+$ hemorragia           &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "…
+$ ictericia            &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "…
+$ dolor_pantorrillas   &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "…
+$ estado_gripal        &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "…
+$ mareos               &lt;chr&gt; "No", "No", "No", "No", "No", "Si", "No", "No", "…</code></pre>
+</div>
+</div>
+</section>
+<section id="comando-semi_join" class="level3">
+<h3 class="anchored" data-anchor-id="comando-semi_join">Comando <code>semi_join()</code></h3>
+<p>Retorna todas las filas de la base X que tienen una coincidencia en la base Y. No agrega columnas de la base Y, solo filtra las filas de la base X.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Une bases</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>base_semi <span class="ot">&lt;-</span> <span class="fu">semi_join</span>(pacientes_clean, sintomas_clean)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Joining with `by = join_by(id_paciente, sexo, fecha_toma_muestra)`</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Chequea número de filas y columnas</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(base_full)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 750
+Columns: 22
+$ id_paciente          &lt;chr&gt; "895db5c1", "8a7605a7", "155d5cab", "e12b7021", "…
+$ sexo                 &lt;chr&gt; "masculino", "femenino", "masculino", "masculino"…
+$ edad_anios           &lt;dbl&gt; 24.0, 26.0, 55.0, 51.0, 27.0, 61.0, 27.0, 62.0, 4…
+$ depto_residencia     &lt;chr&gt; "CONSTITUCION", "SAN JAVIER", "GENERAL OBLIGADO",…
+$ provincia_residencia &lt;chr&gt; "Santa Fe", "Santa Fe", "Santa Fe", "Santa Fe", "…
+$ depto_muestra        &lt;chr&gt; "ROSARIO", "LA CAPITAL", "GENERAL OBLIGADO", "ROS…
+$ fecha_toma_muestra   &lt;date&gt; 2013-06-01, 2014-01-04, 2014-04-22, 2015-01-17, …
+$ anio_toma_muestra    &lt;dbl&gt; 2013, 2014, 2014, 2015, 2014, 2016, 2016, 2013, 2…
+$ semana_toma_muestra  &lt;dbl&gt; 22, 1, 17, 2, 24, 26, 34, 35, 49, 27, 17, 38, 11,…
+$ internado            &lt;chr&gt; "SI", "SI", "NO", "NO", "NO", "NO", "NO", "NO", "…
+$ fiebre               &lt;chr&gt; "Si", "No", "No", "No", "No", "Si", "Si", "Si", "…
+$ cefalea              &lt;chr&gt; "No", "Si", "No", "No", "No", "No", "No", "Si", "…
+$ mialgia              &lt;chr&gt; "No", "No", NA, "No", "No", "No", "No", "Si", "No…
+$ nauseas_vomitos      &lt;chr&gt; "Si", "Si", "No", "No", "No", "Si", NA, "No", "No…
+$ diarrea              &lt;chr&gt; "No", "No", "No", "No", "No", "No", "Si", "No", "…
+$ malestar             &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "…
+$ cansancio            &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "…
+$ hemorragia           &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "…
+$ ictericia            &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "…
+$ dolor_pantorrillas   &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "…
+$ estado_gripal        &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "…
+$ mareos               &lt;chr&gt; "No", "No", "No", "No", "No", "Si", "No", "No", "…</code></pre>
+</div>
+</div>
+</section>
+<section id="comando-anti_join" class="level3">
+<h3 class="anchored" data-anchor-id="comando-anti_join">Comando <code>anti_join()</code></h3>
+<p>Retorna todas las filas de la base X que <strong>no</strong> tienen una coincidencia en la base Y.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Une bases</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>base_anti <span class="ot">&lt;-</span> <span class="fu">anti_join</span>(pacientes_clean, sintomas_clean)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Joining with `by = join_by(id_paciente, sexo, fecha_toma_muestra)`</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Chequea número de filas y columnas</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(base_anti)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 0
+Columns: 10
+$ id_paciente          &lt;chr&gt; 
+$ sexo                 &lt;chr&gt; 
+$ edad_anios           &lt;dbl&gt; 
+$ depto_residencia     &lt;chr&gt; 
+$ provincia_residencia &lt;chr&gt; 
+$ depto_muestra        &lt;chr&gt; 
+$ fecha_toma_muestra   &lt;date&gt; 
+$ anio_toma_muestra    &lt;dbl&gt; 
+$ semana_toma_muestra  &lt;dbl&gt; 
+$ internado            &lt;chr&gt; </code></pre>
+</div>
+</div>
+</section>
+<section id="comando-bind_rows" class="level3">
+<h3 class="anchored" data-anchor-id="comando-bind_rows">Comando <code>bind_rows()</code></h3>
+<p>Combina dos o más datasets añadiendo sus filas. Las columnas de los data frames deben tener los mismos nombres, o se crearán columnas nuevas si alguna columna no existe en alguno de los data frames.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Une bases</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>base_bind_row <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(pacientes_clean, sintomas_clean)</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Chequea número de filas y columnas</span></span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(base_bind_row)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 1,485
+Columns: 22
+$ id_paciente          &lt;chr&gt; "895db5c1", "8a7605a7", "155d5cab", "e12b7021", "…
+$ sexo                 &lt;chr&gt; "masculino", "femenino", "masculino", "masculino"…
+$ edad_anios           &lt;dbl&gt; 24.0, 26.0, 55.0, 51.0, 27.0, 61.0, 27.0, 62.0, 4…
+$ depto_residencia     &lt;chr&gt; "CONSTITUCION", "SAN JAVIER", "GENERAL OBLIGADO",…
+$ provincia_residencia &lt;chr&gt; "Santa Fe", "Santa Fe", "Santa Fe", "Santa Fe", "…
+$ depto_muestra        &lt;chr&gt; "ROSARIO", "LA CAPITAL", "GENERAL OBLIGADO", "ROS…
+$ fecha_toma_muestra   &lt;date&gt; 2013-06-01, 2014-01-04, 2014-04-22, 2015-01-17, …
+$ anio_toma_muestra    &lt;dbl&gt; 2013, 2014, 2014, 2015, 2014, 2016, 2016, 2013, 2…
+$ semana_toma_muestra  &lt;dbl&gt; 22, 1, 17, 2, 24, 26, 34, 35, 49, 27, 17, 38, 11,…
+$ internado            &lt;chr&gt; "SI", "SI", "NO", "NO", "NO", "NO", "NO", "NO", "…
+$ fiebre               &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N…
+$ cefalea              &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N…
+$ mialgia              &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N…
+$ nauseas_vomitos      &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N…
+$ diarrea              &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N…
+$ malestar             &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N…
+$ cansancio            &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N…
+$ hemorragia           &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N…
+$ ictericia            &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N…
+$ dolor_pantorrillas   &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N…
+$ estado_gripal        &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N…
+$ mareos               &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N…</code></pre>
+</div>
+</div>
+</section>
+<section id="comando-bind_cols" class="level3">
+<h3 class="anchored" data-anchor-id="comando-bind_cols">Comando <code>bind_cols()</code></h3>
+<p>Combina dos o más datasets añadiendo sus columnas. Las filas deben ser de la misma longitud; de lo contrario, se completarán con <code>NA</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Une bases</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>base_bind_col <span class="ot">&lt;-</span> <span class="fu">bind_cols</span>(pacientes_clean, sintomas_clean)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-error">
+<pre><code>Error in `bind_cols()`:
+! Can't recycle `..1` (size 735) to match `..2` (size 750).</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Chequea número de filas y columnas</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(base_bind_col)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-error">
+<pre><code>Error in eval(expr, envir, enclos): object 'base_bind_col' not found</code></pre>
+</div>
+</div>
+<p>En este caso, vamos a obtener un mensaje de error al intentar unir los datasets ya que el número de filas en la base X es diferente al número de filas en la base Y</p>
+</section>
+<section id="utilidades-de-la-unión-de-datasets" class="level3">
+<h3 class="anchored" data-anchor-id="utilidades-de-la-unión-de-datasets">Utilidades de la unión de datasets</h3>
+<p>Los comandos <code>xxx_join()</code> se utilizan para unir dos datasets basándose en una o más columnas comunes. Son útiles para:</p>
+<ul>
+<li><p><strong>Unir datos relacionados</strong>: unir dos datasets con información relacionada en uno solo.</p></li>
+<li><p><strong>Análisis combinado</strong>: uniendo datasets con diferentes aspectos del mismo conjunto de datos.</p></li>
+<li><p><strong>Enriquecimiento de datos</strong>: se puede enriquecer un conjunto de datos con información adicional de otro dataset.</p></li>
+<li><p><strong>Filtrado específico</strong>: filtrar datos usando <code>semi_join</code> o <code>anti_join</code> en base a coincidencias o la falta de ellas en otro dataset.</p></li>
+</ul>
+<p>Por otro lado, los comandos <code>bind_xxx()</code> se utilizan para añadir filas o columnas a un dataset, siendo especialmente útiles para:</p>
+<ul>
+<li><p><strong>Agregar nuevas observaciones</strong>: se pueden combinar varios datasets que representan diferentes observaciones de la misma estructura (por ejemplo, datos de diferentes meses o años).</p></li>
+<li><p><strong>Concatenación de resultados</strong>: cuando se quieren analizar juntos múltiples resultados de diferentes cálculos o simulaciones.</p></li>
+<li><p><strong>Agregar nuevas variables</strong>: cuando se tienen bases que contienen diferentes variables (columnas) para las mismas observaciones (filas), puedes combinarlas en una sola.</p></li>
+<li><p><strong>Construcción de dataframes complejos</strong>: cuando se cuenta diferentes componentes de datos y queremos combinarlos en una sola estructura para análisis más completo</p></li>
+</ul>
+<p>En la vida real, los comandos de unión que más se utilizan son <code>left_join()</code> y <code>bind_rows()</code>, pero en algunos casos <code>inner_join()</code> y <code>anti_join()</code> resultan de utilidad para explorar los datos.</p>
+<p>Terminemos de unir las bases de nuestra práctica (recuerden que solo pueden unirse dos bases por vez al usar los <code>joins</code>):</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Une bases</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>base_clean <span class="ot">&lt;-</span> <span class="fu">left_join</span>(pacientes_clean, sintomas_clean) <span class="sc">|&gt;</span> </span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># añado base resultados</span></span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(laboratorio_clean)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Joining with `by = join_by(id_paciente, sexo, fecha_toma_muestra)`
+Joining with `by = join_by(id_paciente)`</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Guardo base limpia</span></span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a><span class="fu">export</span>(base_clean, <span class="at">file =</span> <span class="st">"../clean/base_clean.xlsx"</span>)</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Limpio working environment</span></span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(<span class="at">list =</span> <span class="fu">ls</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="mapas-en-ggplot2" class="level2">
+<h2 class="anchored" data-anchor-id="mapas-en-ggplot2">Mapas en ggplot2</h2>
+<p>Lo que vimos anteriormente sobre unión de datasets nos servirá para el siguiente paso: generar mapas con <code>ggplot2</code> y sus paquetes accesorios <code>sf</code> y <code>tmap</code>.</p>
+<section id="mapas-estáticos-con-sf" class="level3">
+<h3 class="anchored" data-anchor-id="mapas-estáticos-con-sf">Mapas estáticos con <code>sf</code></h3>
+<p>El paquete <code>sf</code> (Simple Features for R) está diseñado para manejar datos vectoriales espaciales de manera eficiente y fácil de usar, y sigue el estándar Simple Features Access (SFA) definido por el Open Geospatial Consortium (OGC). Su capacidad para manejar múltiples formatos de datos espaciales, y sus funciones para realizar análisis y visualización geoespacial lo hacen invaluable para investigadores y profesionales que trabajan con datos espaciales en campos como geografía, ecología, epidemiología, etc.</p>
+<p>Veamos como generar un mapa sencillo en <code>ggplot2</code> usando la base de datos que limpiamos anteriormente:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Carga base limpia pacientes</span></span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>base_clean <span class="ot">&lt;-</span> <span class="fu">import</span>(<span class="st">"../clean/base_clean.xlsx"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Ahora procederemos a cargar una capa geográfica (GIS) que contiene información climática de los distintos departamentos de la provincia de Santa Fe, obtenida de la <a href="https://poblaciones.org/category/cartografias/">Plataforma Abierta de Datos Espaciales de la Argentina (POBLACIONES)</a> y podemos descargarla en la carpeta <strong>datos_clean</strong> subida a la página del curso. Las capas GIS se componen de cinco archivos, siendo el principal, que utilizaremos para leer la capa el que tiene extensión <code>.shp</code>, mientras que el resto contiene información importante sobre la proyección geográfica y la correcta lectura de la capa. El comando para leer capas geográficas se llama <code>st_read</code> y es parte del paquete <code>sf</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Carga capa GIS</span></span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>deptos_sf <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">"../clean/Elevación, precipitaciones y temperaturas medias por departamento - Santa Fe.shp"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Reading layer `Elevación, precipitaciones y temperaturas medias por departamento - Santa Fe' from data source `G:\Mi unidad\Docencia\2024_Introduccion_R\clean\Elevación, precipitaciones y temperaturas medias por departamento - Santa Fe.shp' 
+  using driver `ESRI Shapefile'
+Simple feature collection with 19 features and 52 fields
+Geometry type: MULTIPOLYGON
+Dimension:     XY
+Bounding box:  xmin: -62.88963 ymin: -34.38696 xmax: -58.83213 ymax: -27.99783
+Geodetic CRS:  WGS 84</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Explora capa</span></span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(deptos_sf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 19
+Columns: 53
+$ COD_DPTO   &lt;chr&gt; "82007", "82014", "82021", "82028", "82035", "82042", "8204…
+$ ALTITUD_MA &lt;dbl&gt; 165.74, 127.00, 160.25, 114.00, 68.84, 173.54, 94.07, 139.5…
+$ ALTITUD_MI &lt;dbl&gt; 13.63, 9.07, 24.45, -8.98, -53.70, 40.74, -5.66, -40.13, -6…
+$ ALTITUD_DE &lt;dbl&gt; 152.11, 117.92, 135.79, 122.98, 122.54, 132.79, 99.74, 179.…
+$ CATEGORIA_ &lt;dbl&gt; 5, 4, 4, 3, 1, 5, 2, 3, 2, 2, 3, 2, 3, 2, 2, 2, 3, 4, 3
+$ AREA_KM2   &lt;dbl&gt; 2449.371, 3474.535, 6726.217, 3385.906, 4008.283, 11368.801…
+$ M1_PRECIPI &lt;dbl&gt; 109.7, 104.4, 113.3, 96.3, 122.0, 100.2, 131.3, 110.5, 119.…
+$ M2_PRECIPI &lt;dbl&gt; 89.4, 88.6, 102.7, 93.5, 101.3, 103.8, 122.8, 86.5, 92.7, 9…
+$ M3_PRECIPI &lt;dbl&gt; 139.4, 134.8, 153.8, 135.5, 161.9, 123.7, 175.1, 146.0, 164…
+$ M4_PRECIPI &lt;dbl&gt; 74.0, 75.2, 76.9, 84.2, 91.2, 77.4, 143.1, 76.5, 93.0, 84.2…
+$ M5_PRECIPI &lt;dbl&gt; 46.1, 47.5, 48.9, 57.9, 64.2, 49.7, 68.7, 47.6, 53.7, 52.0,…
+$ M6_PRECIPI &lt;dbl&gt; 19.2, 24.1, 19.1, 31.1, 38.4, 24.8, 48.3, 27.2, 35.4, 28.2,…
+$ M7_PRECIPI &lt;dbl&gt; 27.3, 30.9, 19.6, 37.0, 33.6, 31.7, 37.3, 27.8, 30.1, 25.9,…
+$ M8_PRECIPI &lt;dbl&gt; 26.6, 28.8, 21.7, 37.2, 38.6, 26.7, 37.0, 28.1, 32.8, 29.8,…
+$ M9_PRECIPI &lt;dbl&gt; 64.2, 66.9, 53.2, 70.2, 77.1, 64.8, 81.7, 64.8, 67.8, 63.6,…
+$ M10_PRECIP &lt;dbl&gt; 84.4, 93.5, 79.9, 93.5, 98.6, 97.7, 112.4, 87.6, 90.3, 86.2…
+$ M11_PRECIP &lt;dbl&gt; 93.0, 86.0, 100.3, 88.9, 108.7, 87.5, 140.8, 94.3, 102.3, 1…
+$ M12_PRECIP &lt;dbl&gt; 102.2, 101.2, 120.4, 107.0, 136.1, 109.6, 126.0, 105.6, 129…
+$ PRECIPITAC &lt;dbl&gt; 931.9, 947.3, 975.5, 990.4, 1136.2, 955.9, 1301.1, 963.1, 1…
+$ M1_TEMPERA &lt;dbl&gt; 25.6, 25.2, 25.9, 24.9, 26.1, 24.2, 26.2, 25.6, 26.1, 26.0,…
+$ M2_TEMPERA &lt;dbl&gt; 24.2, 23.8, 24.6, 23.5, 24.8, 23.0, 25.0, 24.2, 24.8, 24.7,…
+$ M3_TEMPERA &lt;dbl&gt; 21.9, 21.4, 22.6, 21.2, 22.8, 20.6, 23.3, 21.9, 22.7, 22.7,…
+$ M4_TEMPERA &lt;dbl&gt; 17.9, 17.4, 18.9, 17.1, 19.1, 16.5, 19.9, 18.0, 19.0, 19.0,…
+$ M5_TEMPERA &lt;dbl&gt; 14.6, 14.0, 15.7, 13.7, 16.0, 13.1, 17.0, 14.6, 15.8, 15.8,…
+$ M6_TEMPERA &lt;dbl&gt; 11.2, 10.7, 12.4, 10.4, 12.7, 9.8, 14.0, 11.2, 12.5, 12.5, …
+$ M7_TEMPERA &lt;dbl&gt; 10.8, 10.2, 12.0, 9.9, 12.4, 9.3, 13.7, 10.8, 12.2, 12.2, 1…
+$ ALTITUD_ME &lt;dbl&gt; 104.23, 92.56, 94.56, 71.34, 19.23, 107.93, 49.07, 67.77, 2…
+$ M8_TEMPERA &lt;dbl&gt; 12.6, 12.0, 13.8, 11.7, 14.2, 11.1, 15.4, 12.6, 13.9, 13.9,…
+$ M9_TEMPERA &lt;dbl&gt; 14.9, 14.4, 16.2, 14.0, 16.4, 13.5, 17.7, 14.9, 16.2, 16.2,…
+$ M10_TEMPER &lt;dbl&gt; 18.5, 17.9, 19.7, 17.5, 19.9, 16.8, 21.0, 18.5, 19.7, 19.8,…
+$ M11_TEMPER &lt;dbl&gt; 21.6, 21.0, 22.5, 20.7, 22.6, 20.0, 23.3, 21.6, 22.5, 22.5,…
+$ M12_TEMPER &lt;dbl&gt; 24.4, 23.9, 24.9, 23.6, 25.0, 23.0, 25.3, 24.4, 25.0, 25.0,…
+$ TEMPERATUR &lt;dbl&gt; 18.2, 17.7, 19.1, 17.4, 19.3, 16.7, 20.1, 18.2, 19.2, 19.2,…
+$ CATEGORI_1 &lt;dbl&gt; 9, 9, 9, 8, 9, 8, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9
+$ CATEGORI_2 &lt;dbl&gt; 6, 5, 6, 5, 6, 5, 6, 6, 6, 6, 7, 6, 6, 6, 6, 6, 6, 6, 6
+$ CATEGORI_3 &lt;dbl&gt; 3, 3, 3, 2, 3, 2, 4, 3, 3, 3, 4, 3, 4, 4, 3, 4, 3, 3, 4
+$ CATEGORI_4 &lt;dbl&gt; 6, 6, 6, 6, 6, 5, 7, 6, 6, 6, 7, 6, 7, 7, 6, 7, 6, 6, 7
+$ CATEGORI_5 &lt;dbl&gt; 6, 6, 6, 5, 6, 5, 7, 6, 6, 6, 7, 6, 6, 6, 6, 6, 6, 6, 7
+$ CATEGORI_6 &lt;dbl&gt; 6, 6, 7, 6, 7, 6, 7, 7, 7, 7, 7, 6, 7, 7, 6, 7, 6, 7, 7
+$ CATEGORI_7 &lt;dbl&gt; 5, 5, 5, 5, 6, 5, 7, 5, 6, 5, 5, 5, 5, 6, 5, 5, 5, 5, 7
+$ CATEGORI_8 &lt;dbl&gt; 2, 3, 2, 3, 3, 3, 3, 2, 3, 2, 2, 3, 2, 3, 2, 3, 2, 2, 2
+$ CATEGORI_9 &lt;dbl&gt; 5, 6, 5, 6, 6, 6, 7, 5, 6, 5, 5, 5, 5, 6, 6, 6, 5, 5, 6
+$ CATEGORI10 &lt;dbl&gt; 5, 5, 5, 5, 8, 5, 9, 5, 7, 6, 5, 5, 6, 8, 6, 8, 5, 5, 8
+$ IDPROV     &lt;chr&gt; "82", "82", "82", "82", "82", "82", "82", "82", "82", "82",…
+$ PROV       &lt;chr&gt; "Santa Fe", "Santa Fe", "Santa Fe", "Santa Fe", "Santa Fe",…
+$ IDDPTO     &lt;chr&gt; "82007", "82014", "82021", "82028", "82035", "82042", "8204…
+$ DPTO       &lt;chr&gt; "Belgrano", "Caseros", "Castellanos", "Constitución", "Gara…
+$ DEPARTAMEN &lt;dbl&gt; 44788, 82100, 178092, 86910, 20890, 191024, 176410, 66675, …
+$ DEPARTAM_1 &lt;dbl&gt; 14481, 27951, 56560, 27693, 5860, 64397, 49969, 21896, 1651…
+$ DEPARTAM_2 &lt;dbl&gt; -32.61047, -33.22145, -31.23135, -33.48451, -31.05555, -33.…
+$ DEPARTAM_3 &lt;dbl&gt; -61.70471, -61.53297, -61.65707, -60.88070, -60.12933, -61.…
+$ DEPARTAM_4 &lt;dbl&gt; 2449.387, 3474.580, 6726.269, 3386.174, 4008.375, 11368.839…
+$ geometry   &lt;MULTIPOLYGON [°]&gt; MULTIPOLYGON (((-61.47292 -..., MULTIPOLYGON (((-61.17635 -…</code></pre>
+</div>
+</div>
+<p>Ahora procederemos a limpiar un poco la capa geográfica usando las funciones de <code>tidyverse</code>. Según el diccionario de datos adjunto en la carpeta, nos interesa mantener las variables <code>dpto</code>, <code>categoria_altura</code>, <code>precip_anual</code> y <code>temp_anual_media</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Limpia dataset</span></span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>deptos_sf <span class="ot">&lt;-</span> deptos_sf <span class="sc">|&gt;</span> </span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># estandariza nombres columnas</span></span>
+<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">clean_names</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># cambia manualmente nombres columnas</span></span>
+<span id="cb54-7"><a href="#cb54-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(</span>
+<span id="cb54-8"><a href="#cb54-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">altura_cat =</span> categoria,</span>
+<span id="cb54-9"><a href="#cb54-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">precip_anual =</span> precipitac,</span>
+<span id="cb54-10"><a href="#cb54-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">temp_anual_media =</span> temperatur) <span class="sc">|&gt;</span> </span>
+<span id="cb54-11"><a href="#cb54-11" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb54-12"><a href="#cb54-12" aria-hidden="true" tabindex="-1"></a>  <span class="co"># cambia a mayúsculas nombres deptos</span></span>
+<span id="cb54-13"><a href="#cb54-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">dpto =</span> <span class="fu">toupper</span>(dpto)) <span class="sc">|&gt;</span> </span>
+<span id="cb54-14"><a href="#cb54-14" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb54-15"><a href="#cb54-15" aria-hidden="true" tabindex="-1"></a>  <span class="co"># descarta columnas innecesarias</span></span>
+<span id="cb54-16"><a href="#cb54-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(dpto, altura_cat, precip_anual, temp_anual_media)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Uniremos la base de los pacientes con la capa GIS usando <code>left_join()</code>:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Une base y datos GIS</span></span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>base_gis <span class="ot">&lt;-</span> <span class="fu">left_join</span>(base_clean, deptos_sf,</span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>                      <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"depto_residencia"</span> <span class="ot">=</span> <span class="st">"dpto"</span>))</span>
+<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-5"><a href="#cb55-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Explora NAs nuevas columnas</span></span>
+<span id="cb55-6"><a href="#cb55-6" aria-hidden="true" tabindex="-1"></a><span class="fu">tabyl</span>(base_gis<span class="sc">$</span>altura_cat)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> base_gis$altura_cat   n     percent valid_percent
+                   1   6 0.008163265   0.008784773
+                   2 575 0.782312925   0.841874085
+                   3  65 0.088435374   0.095168375
+                   4  35 0.047619048   0.051244510
+                   5   2 0.002721088   0.002928258
+                  NA  52 0.070748299            NA</code></pre>
+</div>
+</div>
+<p>Observamos que 52 filas tienen valores ausentes para la columna <code>altura_cat</code>, esto posiblemente se deba a que los nombres de los departamentos en la capa GIS contengan acentos o caracteres especiales, para estandarizarlos usaremos el comando <code>stri_trans_general()</code> del paquete <code>stringi</code>:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>deptos_sf <span class="ot">&lt;-</span> deptos_sf <span class="sc">|&gt;</span> </span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">dpto =</span> stringi<span class="sc">::</span><span class="fu">stri_trans_general</span>(dpto, <span class="at">id =</span> <span class="st">"Latin-ASCII"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Ahora volveremos a correr la unión de bases:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Une base y datos GIS</span></span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>base_gis <span class="ot">&lt;-</span> <span class="fu">left_join</span>(base_clean, deptos_sf,</span>
+<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a>                      <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"depto_residencia"</span> <span class="ot">=</span> <span class="st">"dpto"</span>))</span>
+<span id="cb58-4"><a href="#cb58-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-5"><a href="#cb58-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Explora NAs nuevas columnas</span></span>
+<span id="cb58-6"><a href="#cb58-6" aria-hidden="true" tabindex="-1"></a><span class="fu">tabyl</span>(base_gis<span class="sc">$</span>altura_cat)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> base_gis$altura_cat   n     percent
+                   1   6 0.008163265
+                   2 586 0.797278912
+                   3  83 0.112925170
+                   4  42 0.057142857
+                   5  18 0.024489796</code></pre>
+</div>
+</div>
+<p>No quedan columnas con NAs, así que podemos proceder a convertir la base en objeto espacial con el comando <code>st_as_sf()</code> y luego generar una tabla con los casos de leptospirosis por departamento:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Estructura base original</span></span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(base_gis)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "data.frame"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb62"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Crea base casos por depto</span></span>
+<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a>casos_depto_gis <span class="ot">&lt;-</span> base_gis <span class="sc">|&gt;</span> </span>
+<span id="cb62-3"><a href="#cb62-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># transforma a objeto espacial</span></span>
+<span id="cb62-4"><a href="#cb62-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_as_sf</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb62-5"><a href="#cb62-5" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb62-6"><a href="#cb62-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># tabla de casos por departamento</span></span>
+<span id="cb62-7"><a href="#cb62-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(depto_residencia, altura_cat, precip_anual, temp_anual_media,</span>
+<span id="cb62-8"><a href="#cb62-8" aria-hidden="true" tabindex="-1"></a>        resultado_tipo) <span class="sc">|&gt;</span> </span>
+<span id="cb62-9"><a href="#cb62-9" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb62-10"><a href="#cb62-10" aria-hidden="true" tabindex="-1"></a>  <span class="co"># filtra casos descartados</span></span>
+<span id="cb62-11"><a href="#cb62-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(resultado_tipo <span class="sc">==</span> <span class="dv">1</span>)</span>
+<span id="cb62-12"><a href="#cb62-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-13"><a href="#cb62-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Estructura de la nueva base</span></span>
+<span id="cb62-14"><a href="#cb62-14" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(casos_depto_gis)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "sf"         "data.frame"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(casos_depto_gis)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 14
+Columns: 7
+$ depto_residencia &lt;chr&gt; "CASEROS", "CASTELLANOS", "CONSTITUCION", "GARAY", "G…
+$ altura_cat       &lt;dbl&gt; 4, 4, 3, 1, 2, 3, 2, 2, 2, 2, 2, 3, 4, 3
+$ precip_anual     &lt;dbl&gt; 947.3, 975.5, 990.4, 1136.2, 1301.1, 963.1, 1084.3, 1…
+$ temp_anual_media &lt;dbl&gt; 17.7, 19.1, 17.4, 19.3, 20.1, 18.2, 19.2, 19.2, 17.9,…
+$ resultado_tipo   &lt;dbl&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
+$ n                &lt;int&gt; 3, 1, 4, 1, 9, 3, 27, 1, 43, 9, 3, 1, 1, 9
+$ geometry         &lt;POLYGON [°]&gt; POLYGON ((-61.18231 -32.935..., POLYGON ((-61.22809 -…</code></pre>
+</div>
+</div>
+<p>Podemos ver que la nueva base tiene estructura <code>"sf"</code> y <code>"data.frame"</code> y que se mantiene la columna <code>geometry</code> a pesar de no haberla incluido en el <code>count()</code>. Esto se debe a que <code>geometry</code> contiene la información geográfica necesaria para graficar la capa como mapa.</p>
+<p>Procederemos a crear nuestro primer mapa usando <code>ggplot2</code>&nbsp;y el comando <code>geom_sf()</code>:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Genera mapa</span></span>
+<span id="cb66-2"><a href="#cb66-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb66-3"><a href="#cb66-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data =</span> casos_depto_gis)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Vemos que la bota de la provincia de Santa Fe aparece cortada, ya que no se registraron casos de leptospirosis en todos los departamentos durante el periodo de estudio. Vamos a asignarle una escala de color dinámica según el número de casos y a colocar el mapa de todos los departamentos como capa base. A diferencia de lo que vimos anteriormente en <code>ggplot2</code>, cuando trabajamos con más de una capa geográfica conviene llamar el argumento <code>data =</code> dentro de cada geoma.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb67"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Genera mapa</span></span>
+<span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb67-3"><a href="#cb67-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Añade capa base departamentos</span></span>
+<span id="cb67-4"><a href="#cb67-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data =</span> deptos_sf) <span class="sc">+</span></span>
+<span id="cb67-5"><a href="#cb67-5" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb67-6"><a href="#cb67-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Añade casos por departamento</span></span>
+<span id="cb67-7"><a href="#cb67-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data =</span> casos_depto_gis, <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">fill =</span> n)) <span class="sc">+</span></span>
+<span id="cb67-8"><a href="#cb67-8" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb67-9"><a href="#cb67-9" aria-hidden="true" tabindex="-1"></a>  <span class="co"># cambia escala color colorblind-friendly</span></span>
+<span id="cb67-10"><a href="#cb67-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_c</span>(<span class="at">alpha =</span> .<span class="dv">75</span>) <span class="sc">+</span></span>
+<span id="cb67-11"><a href="#cb67-11" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb67-12"><a href="#cb67-12" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Tema claro</span></span>
+<span id="cb67-13"><a href="#cb67-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-22-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>El gráfico obtenido se conoce como <strong>mapa coroplético</strong> y muestra áreas delimitadas en distintos colores para representar variaciones espaciales de una variable específica. Es particularmente útil para visualizar datos geoespaciales como densidad poblacional, tasas de una enfermedad, temperaturas y precipitaciones medias, etc.</p>
+<section id="actividad" class="level4">
+<h4 class="anchored" data-anchor-id="actividad">Actividad:</h4>
+<p>Siguiendo el ejemplo anterior, generen mapas coropléticos para el resto de las variables de <code>casos_depto_gis</code>, observen detenidamente los mapas para detectar si existe algún tipo de patrón climático asociado a los casos de leptospirosis. Pueden usar facets para colocar los mapas uno al lado del otro.</p>
+</section>
+</section>
+<section id="mapas-estáticos-y-dinámicos-con-tmap" class="level3">
+<h3 class="anchored" data-anchor-id="mapas-estáticos-y-dinámicos-con-tmap">Mapas estáticos y dinámicos con <code>tmap</code></h3>
+<p>Finalmente, veremos el paquete <code>tmap</code>, que expande las funciones de <code>sf</code>&nbsp;y <code>ggplot2</code> permitiendo generar mapas dinámicos con la opción <code>tmap_mode("view")</code>. Un pequeño ejemplo a partir del mapa generado anteriormente:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb68"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Modo dinámico</span></span>
+<span id="cb68-2"><a href="#cb68-2" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_mode</span>(<span class="st">"view"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>tmap mode set to interactive viewing</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb70"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Genero mapa</span></span>
+<span id="cb70-2"><a href="#cb70-2" aria-hidden="true" tabindex="-1"></a>mapa_dinamico <span class="ot">&lt;-</span> </span>
+<span id="cb70-3"><a href="#cb70-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Mapa base</span></span>
+<span id="cb70-4"><a href="#cb70-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_basemap</span>(<span class="at">server =</span> <span class="st">"OpenStreetMap"</span>) <span class="sc">+</span></span>
+<span id="cb70-5"><a href="#cb70-5" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb70-6"><a href="#cb70-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Capa departamentos</span></span>
+<span id="cb70-7"><a href="#cb70-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_shape</span>(<span class="at">shp =</span> deptos_sf) <span class="sc">+</span></span>
+<span id="cb70-8"><a href="#cb70-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_borders</span>() <span class="sc">+</span></span>
+<span id="cb70-9"><a href="#cb70-9" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb70-10"><a href="#cb70-10" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Capa casos por depto</span></span>
+<span id="cb70-11"><a href="#cb70-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_shape</span>(<span class="at">shp =</span> casos_depto_gis) <span class="sc">+</span></span>
+<span id="cb70-12"><a href="#cb70-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>(<span class="at">col =</span> <span class="st">"n"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>El comando <code>tm_basemap()</code> crea un mapa base usando capas de OpenStreetMap u otros servidores, por otro lado <code>tm_shape()</code> llama a la capa geográfica que queremos graficar y los comandos <code>tm_borders()</code>, <code>tm_fill()</code>, <code>tm_polygons()</code>, indican de que forma quiero que aparezcan (solo bordes, solo relleno, bordes y relleno). Por otro lado, el argumento <code>col =</code> nos permite especificar si el color de relleno será estático o dinámico de acuerdo a los valores de alguna variable o variables de la capa. Existe gran diversidad de opciones de configuración, así como comandos para datos geográficos de puntos, que les invito a que exploren de acuerdo a sus necesidades.</p>
+<section id="actividad-1" class="level4">
+<h4 class="anchored" data-anchor-id="actividad-1">Actividad</h4>
+<p>Al mapa anterior, añadirle las demás capas de la base mediante el argumento <code>col = c("var1", "var2", ...,"varn")</code> y ver que ocurre. Pueden jugar con la transparencia de las capas y usar paletas personalizadas con los paquetes <code>RColorBrewer</code> y <code>scico</code>. También pueden ocultar y mostrar capas en la vista interactiva usando el argumento <code>group =</code> .</p>
+</section>
+</section>
+</section>
+<section id="documentos-con-r-markdown" class="level2">
+<h2 class="anchored" data-anchor-id="documentos-con-r-markdown">Documentos con R Markdown</h2>
+<p>RMarkdown es una extensión del lenguaje Markdown que se utiliza para formatear texto y permite integrar código de R directamente en un documento que puede contener texto, gráficos y otros elementos. Los documentos de RMarkdown&nbsp;se componen de tres partes:</p>
+<ul>
+<li><strong>Cabecera YAML</strong>: sección al comienzo del documento que contiene metadatos sobre el documento como ser título, autor, fecha y formato de salida. Se delimita por triple guión medio <code>---</code>.</li>
+</ul>
+<!-- -->
+<ul>
+<li><p><strong>Bloques de código:</strong> secciones de código delimitadas por triple tilde o backticks (<code>```{r}</code>) donde se escribe el código R.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb71"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># Código R</span></span>
+<span id="cb71-2"><a href="#cb71-2" aria-hidden="true" tabindex="-1"></a>summary(mtcars)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></li>
+<li><p><strong>Texto:</strong> texto en formato Markdown que describe y explica los resultados del código, mezclado con los bloques de código.</p></li>
+</ul>
+<p>Si bien originalmente estaba contemplado aprender a generar documentos de Markdown, la complejidad del mismo excede el contenido del curso. Por otro lado, POSIT, los creadores de RStudio y RMarkdown están trabajando en reemplazarlo por Quarto, otro lenguaje de marcas mucho más versátil y amigable con el usuario.</p>
+<p>Quienes tengan interés en Quarto, pueden acceder a las clases del taller que dicta Christian Ballejo haciendo click aquí:</p>
+<ul>
+<li><p><a href="https://cballejo.github.io/2024/Encuentro3/#/hola-quarto-title">Introducción a Quarto</a></p></li>
+<li><p><a href="https://cballejo.github.io/2024/Encuentro4/#/docu-estaticos-title">Documentos estáticos en Quarto</a> parte 1</p></li>
+<li><p><a href="https://cballejo.github.io/2024/Encuentro5/#/docu-estaticos-title">Documentos estáticos en Quarto</a> parte 2</p></li>
+</ul>
+</section>
+<section id="qué-sigue-ahora" class="level2">
+<h2 class="anchored" data-anchor-id="qué-sigue-ahora">¿Qué sigue ahora?</h2>
+<p>Esta es la última clase teórico-práctica del curso de introducción a <code>tidyverse</code>. Para aprobar el mismo deberán realizar una actividad evaluativa final en donde deberán aplicar todos los conocimientos que adquirieron en el curso a un nuevo dataset. Es necesario que tengan aprobadas las actividades 1 y 2 para poder acceder al trabajo final, mientras que el resto de los ejercicios no son obligatorios.</p>
+<p>La actividad final la estaré subiendo durante la primer semana de julio y tendrán un plazo de 20 días para realizarla.</p>
+<p>Espero que el curso les haya sido de utilidad, muchas gracias a quienes llegaron hasta el final del mismo!!!</p>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

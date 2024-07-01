@@ -1,0 +1,75 @@
+/*-- scss:defaults --*/
+
+/* Variables */
+$font-family: helvetica, sans-serif;
+$font-size: 12pt;
+$h1-font-size: 24pt;
+$h2-font-size: 22pt;
+$h3-font-size: 20pt;
+$h4-font-size: 18pt;
+$h5-font-size: 16pt;
+$h6-font-size: 14pt;
+$active-color: #fff;
+$active-bg-color: #00746B;
+$active-border-color: #337ab7;
+
+/*-- scss:mixins --*/
+
+/* You can add mixins here if needed in the future */
+
+/*-- scss:functions --*/
+
+/* You can add functions here if needed in the future */
+
+/*-- scss:uses --*/
+
+/* This section can include @use and @import rules */
+
+/*-- scss:rules --*/
+
+/* Whole document: */
+body {
+  font-family: $font-family;
+  font-size: $font-size;
+}
+
+/* Headers */
+h1 {
+  font-size: $h1-font-size;
+}
+
+h2 {
+  font-size: $h2-font-size;
+}
+
+h3 {
+  font-size: $h3-font-size;
+}
+
+h4 {
+  font-size: $h4-font-size;
+}
+
+h5 {
+  font-size: $h5-font-size;
+}
+
+h6 {
+  font-size: $h6-font-size;
+}
+
+.list-group-item {
+  &.active,
+  &.active:focus,
+  &.active:hover {
+    z-index: 2;
+    color: $active-color;
+    background-color: $active-bg-color;
+    border-color: $active-border-color;
+  }
+}
+
+.sidebar nav[role="doc-toc"] ul > li > a.active {
+    color: #fff !important;
+    background-color: #066;
+}
