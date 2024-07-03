@@ -148,3 +148,286 @@ data_clean <- starwars %>%
 # Visualizo datos limpios
 data_clean
 ```
+
+#### Actividad evaluativa
+
+Desde este [link](http://capacitacion.anlis.gob.ar/mod/quiz/view.php?id=8678) pueden acceder a la segunda actividad evaluativa del curso.
+
+### Ejemplo teórico práctico
+
+#### Estandarizar nombres de columnas
+
+El primer paso en el proceso de limpieza será revisar los nombres de las columnas para determinar si necesitan ser estandarizados. En el caso de la base de datos de síntomas cuando ejecutamos el comando `names()` encontramos lo siguiente:
+
+```{r}
+## Carga paquetes
+pacman::p_load(
+  rio,
+  skimr,
+  janitor,
+  tidyverse
+)
+
+## Carga datos síntomas
+sintomas <- import("../raw/base_sintomas.csv")
+
+# revisa nombres de columnas
+names(sintomas)
+```
+
+De acuerdo a esta salida, debemos estandarizar los nombres de todas las columnas con `clean_names()` y renombrar manualmente algunas columnas que son difíciles de interpretar o que están nombradas de forma diferente en el dataset de pacientes.
+
+Hay tres columnas que están codificadas de forma diferente en el dataset de pacientes y el de síntomas y hay que renombrar manualmente: `idPaciente`, `género`, `FTM`. Además, otras tres columnas se podrían modificar para hacerlas más legibles: `nauseasyvómitos`, `dolor de pantorrillas` y `gripal`.
+
+Modificando los nombres de todas estas columnas, el código de limpieza para la base de síntomas debería ser similar a este:
+
+```{r}
+## Limpieza base síntomas
+sintomas_clean <- sintomas %>%
+
+
+### Estandariza nombres de columnas
+clean_names() %>%
+
+rename(
+sexo = genero,
+fecha_toma_muestra = ftm,
+nauseas_vomitos = nauseasyvomitos,
+dolor_pantorrillas = dolor_de_pantorrillas,
+estado_gripal = gripal
+)
+```
+
+Una vez que modificamos los nombres de columnas que sea necesario, chequeamos que los cambios se hayan realizado correctamente ejecutando el comando `names(sintomas_clean)` y seguimos con la limpieza del dataset.
+
+#### Detección de celdas vacías y valores NA
+
+Revisaremos la estructura de las columnas con la función `glimpse()` y detectaremos la presencia de valores ausentes y duplicados con `skim()`.
+
+```{r}
+glimpse(sintomas_clean)
+
+skim(sintomas_clean)
+```
+
+El contenido de las columnas `n_missing` y `empty` de la salida de la función `skim()` no coincide. Esto se debe a que en el dataset con el que estamos trabajando, los valores ausentes no se codificaron como `NA` sino utilizando alguna otra etiqueta (ej: 999, -999, 0000, N/A, N/D, N/S, ..., ---. etc.).
+
+Para investigar cómo fueron codificados los valores ausentes, podemos revisar directamente el dataset utilizando los comandos `View(sintomas_clean)` (R base), `view(sintomas_clean)` (tidyverse) o bien haciendo click sobre el nombre del objeto en el panel de Environment. Otra forma de explorar como se cargaron los valores ausentes consisitiría en hacer una tabla de frecuencias por cada variable con el comando `tabyl()`:
+
+```{r}
+tabyl(sintomas_clean, fiebre)
+
+tabyl(sintomas_clean, mialgia)
+
+tabyl(sintomas_clean, dolor_pantorrillas)
+```
+
+Una vez que nos aseguramos que todos los valores ausentes están codificados de la misma forma, podemos modificarlos columna por columna usando:
+
+```{r}
+#| eval: false
+mutate(
+
+nombre_columna_1 = na_if(nombre_columna_1, ""),
+
+nombre_columna_2 = na_if(nombre_columna_2, ""),
+
+nombre_columna_n = na_if(nombre_columna_n, "")
+
+)
+```
+
+Donde el comando `na_if(nombre_columna, "")` del paquete `dplyr` nos permite reemplazar por `NA` los valores que especificamos entre comillas.
+
+#### Modificar múltiples columnas con `across()`
+
+Repetir el proceso de modificar columna por columna puede ser tedioso si el dataset cuenta con varias columnas, para solucionar este problema `dplyr` cuenta con las funciones `across(.cols = columnas, .fns = ~ funcion())` y `where()` que usadas juntas permiten aplicar una transformación a varias columnas a la vez según una condición. Por ejemplo:
+
+```{r}
+#| eval: false
+mutate(
+
+across(
+
+.cols = where(is.character),
+
+.fns = ~ na_if(.x, "")
+
+))
+```
+
+donde `where(is.character)` indica que vamos a seleccionar todas las columnas de clase caracter; `~` es el operador usado para especificar una fórmula y `.x` significa que se aplicará la transformación a todas las columnas seleccionadas. Entonces, para recodificar los `NA` en la base de síntomas podemos usar el siguiente comando:
+
+```{r}
+#| eval: false
+sintomas_clean %>%
+  
+mutate(
+
+across( .cols = where(is.character),
+
+.fns = ~ na_if(.x, "")
+
+))
+```
+
+Si quisiéramos aplicar `where()` a columnas de tipo numérico, deberíamos reemplazar el argumento entre paréntesis por `is.numeric`, mientras que si nos interesara aplicar la transformación a todas las columnas del dataset, usaríamos la función `everything()` en lugar de `where()`. También podríamos seleccionar columnas específicas que contengan cierto patrón usando las funciones de selección `starts_with("condicion"), ends_with("condicion"), contains("condicion"), matches("condicion")` y otras funciones de selección que `dplyr` toma del paquete `tidyselect`. Para más información pueden visitar los siguientes links: [across()](https://dplyr.tidyverse.org/reference/across.html), [comandos tidyselect](https://dplyr.tidyverse.org/reference/dplyr_tidy_select.html)
+
+#### Detección de cadenas de texto
+
+Otras funciones importante para usar en combinación con `mutate(), select(), filter(), if_else()`, etc.son aquellas que permiten detectar y/o reemplazar texto.
+
+En `R base`, los comandos `grep(pattern, x)` y `grepl(pattern, x)` permiten detectar una expresión regular o una cadena de texto específico en un vector/columna de tipo caracter, mientras que los comandos `sub(pattern, replacement, x)` y `gsub(pattern, replacement, x)` nos permiten detectar una expresión regular y reemplazarla por otra que especificamos.
+
+En `tidyverse` el paquete `stringr` nos permite trabajar con expresiones regulares usando los comandos `str_detect(string, pattern), str_replace(string, pattern, replacement), str_replace_all(string, pattern, replacement)`, entre otros. Donde `string` es la columna o vector, `pattern` la expresión regular o texto que queremos buscar y `replacement` la expresión regular o texto con la que queremos reemplazarlo.
+
+La lista completa de comandos y sus usos puede consultarse en este link: [stringr](https://stringr.tidyverse.org/)
+
+Más información sobre trabajar con cadenas de texto y expresiones regulares en este link: [EpiRhandbook](https://www.epirhandbook.com/es/characters-and-strings.html)
+
+Para probar como se trabaja con expresiones regulares, vamos a cargar y limpiar el dataset "**base_laboratorio.xlsx**" que contiene los resultados de los test de laboratorio para los pacientes con sospecha clínica de leptospirosis.
+
+Luego de cargar los datos crudos, creamos un nuevo objeto para los datos limpios y repetimos los pasos aprendidos en esta clase y la anterior para:
+
+1.  Estandarizar los nombres de columna
+
+2.  Revisar/corregir valores ausentes
+
+3.  Corregir el formato de las fechas
+
+4.  Crear variables para el año y semana epidemiológica de inicio de los síntomas 
+
+Una vez completados estos pasos, vamos a ejecutar el comando `tabyl(laboratorio_clean, resultado)` y observar la salida del mismo. Podemos distinguir que existen varias categorías para los casos confirmados, descartados, sospechosos y probables. Nos interera crear una nueva variable llamada `resultado_cat` donde se asigne el valor "**POS**" si se detecta la cadena de texto "**CONF**" y que asigne el valor "**NEG**" en caso contrario.
+
+```{r}
+#| eval: false
+
+sintomas_clean %>%
+mutate(resultado_cat = if_else(str_detect(resultado,"CONF"), "POS", "NEG"))
+```
+
+El script de limpieza final debería verse similar a:
+
+```{r}
+#| eval: false
+
+
+# Carga paquetes ----------------------------------------------------------
+pacman::p_load(
+  skimr,
+  rio,
+  janitor,
+  tidyverse
+)
+
+
+# Carga datos -------------------------------------------------------------
+### Base pacientes
+pacientes <- import("../raw/base_pacientes.xlsx")                                                                                       
+### Base síntomas
+sintomas <- import("../raw/base_sintomas.csv")
+
+### Base resultados
+laboratorio <- import("../raw/base_lab.xlsx")
+
+
+# Limpia datos pacientes --------------------------------------------------
+pacientes_clean <- pacientes %>% 
+  
+  # Estandariza nombres de columnas
+  clean_names() %>% 
+  
+  # Renombra columnas manualmente
+  rename(depto_residencia = depto_r,
+         depto_muestra = depto_m,
+         provincia_residencia = provincia_resid) %>% 
+  
+  # Filtra datos de otras provincias
+  filter(!is.na(depto_residencia)) %>% 
+  
+  # Filtra registros sin edad y sexo
+  filter(!is.na(sexo) & !is.na(edad_diagnostico)) %>% 
+  
+  # Corrige provincia
+  mutate(provincia_residencia = "Santa Fe") %>% 
+  
+  ### Cambia etiquetas sexo
+  mutate(sexo = if_else(sexo == "M", "masculino", "femenino")) %>% 
+  
+  ### Cambia formato de fechas
+  mutate(fecha_toma_muestra = dmy(fecha_toma_muestra)) %>% 
+  
+  ### Crea nuevas columnas
+  ## Año toma de muestra
+  mutate(anio_toma_muestra = year(fecha_toma_muestra)) %>% 
+  
+  ## Semana epidemiológica
+  mutate(semana_toma_muestra = epiweek(fecha_toma_muestra)) %>% 
+  
+  ## Edad en años
+  mutate(edad_anios = case_when(
+    tipo_edad_diagnostico=="MESES" ~ edad_diagnostico/12,
+    grupo_edad %in% c("<= 1 AÑO") ~ edad_diagnostico/12,
+    TRUE ~ edad_diagnostico)) %>% 
+  
+  ### Ordena columnas
+  select(id_paciente, sexo, edad_anios, provincia_residencia, depto_residencia,
+         fecha_toma_muestra, anio_toma_muestra, semana_toma_muestra, internado) %>% 
+  
+  ### Elimina duplicados
+  distinct()
+  
+
+# Limpia base síntomas ----------------------------------------------------
+sintomas_clean <- sintomas %>% 
+  
+  ### Estandariza nombres de columnas
+  clean_names() %>% 
+  
+  rename(
+    sexo = genero,
+    fecha_toma_muestra = ftm,
+    nauseas_vomitos = nauseasyvomitos,
+    dolor_pantorrillas = dolor_de_pantorrillas,
+    estado_gripal = gripal
+  ) %>% 
+  
+  ### Corrige formato fechas
+  mutate(fecha_toma_muestra = dmy(fecha_toma_muestra)) %>% 
+  
+  ### Cambia etiquetas sexo
+  mutate(sexo = if_else(sexo == "M", "masculino", "femenino")) %>% 
+  
+  ### Corrige valores faltantes
+  mutate(across(where(is.character), 
+                .fns = ~ na_if(.x, ""))) %>% 
+  
+  ### Elimina duplicados
+  distinct()
+  
+  
+# Limpia base resultados --------------------------------------------------
+laboratorio_clean <- laboratorio %>% 
+  
+  ### Estandariza nombre de columnas
+  clean_names() %>% 
+  
+  rename(id_paciente = id_pte) %>% 
+  
+  ### Corrige formato fechas
+  mutate(fecha_inicio_sintomas = convert_to_date(fecha_inicio_sintomas)) %>% 
+  
+  ### Año inicio síntomas
+  mutate(anio_inicio_sintomas = year(fecha_inicio_sintomas)) %>% 
+  
+  ## Semana epidemiológica
+  mutate(semana_inicio_sintomas = epiweek(fecha_inicio_sintomas)) %>% 
+  
+  ### Recategoriza resultado
+  mutate(resultado_cat = if_else(grepl("CONF", resultado),
+                                 "POS", "NEG")) %>% 
+  
+  
+  ### Limpia duplicados
+  distinct()
+```

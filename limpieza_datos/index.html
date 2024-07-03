@@ -91,6 +91,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#limpieza-de-datos-con-dplyr" id="toc-limpieza-de-datos-con-dplyr" class="nav-link" data-scroll-target="#limpieza-de-datos-con-dplyr">Limpieza de datos con <code>dplyr</code></a></li>
   <li><a href="#operador-pipe" id="toc-operador-pipe" class="nav-link" data-scroll-target="#operador-pipe">Operador <em>pipe (</em><code>%&gt;%</code><em>)</em></a></li>
   <li><a href="#ejemplo-práctico-en-r" id="toc-ejemplo-práctico-en-r" class="nav-link" data-scroll-target="#ejemplo-práctico-en-r">Ejemplo práctico en R</a></li>
+  <li><a href="#ejemplo-teórico-práctico" id="toc-ejemplo-teórico-práctico" class="nav-link" data-scroll-target="#ejemplo-teórico-práctico">Ejemplo teórico práctico</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -286,6 +287,536 @@ $ starships  &lt;list&gt; &lt;"X-wing", "Imperial shuttle"&gt;, &lt;&gt;, &lt;&g
 16 Captain Phasma     Human      feminine &lt;NA&gt;      Human feminine     </code></pre>
 </div>
 </div>
+<section id="actividad-evaluativa" class="level4">
+<h4 class="anchored" data-anchor-id="actividad-evaluativa">Actividad evaluativa</h4>
+<p>Desde este <a href="http://capacitacion.anlis.gob.ar/mod/quiz/view.php?id=8678">link</a> pueden acceder a la segunda actividad evaluativa del curso.</p>
+</section>
+</section>
+<section id="ejemplo-teórico-práctico" class="level3">
+<h3 class="anchored" data-anchor-id="ejemplo-teórico-práctico">Ejemplo teórico práctico</h3>
+<section id="estandarizar-nombres-de-columnas" class="level4">
+<h4 class="anchored" data-anchor-id="estandarizar-nombres-de-columnas">Estandarizar nombres de columnas</h4>
+<p>El primer paso en el proceso de limpieza será revisar los nombres de las columnas para determinar si necesitan ser estandarizados. En el caso de la base de datos de síntomas cuando ejecutamos el comando&nbsp;<code>names()</code>&nbsp;encontramos lo siguiente:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Carga paquetes</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  rio,</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  skimr,</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  janitor,</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  tidyverse</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="do">## Carga datos síntomas</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>sintomas <span class="ot">&lt;-</span> <span class="fu">import</span>(<span class="st">"../raw/base_sintomas.csv"</span>)</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="co"># revisa nombres de columnas</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(sintomas)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "idPaciente"            "género"                "FTM"                  
+ [4] "fiebre"                "cefalea"               "mialgia"              
+ [7] "nauseasyvómitos"       "diarrea"               "malestar"             
+[10] "cansancio"             "hemorragia"            "ictericia"            
+[13] "dolor de pantorrillas" "gripal"                "mareos"               </code></pre>
+</div>
+</div>
+<p>De acuerdo a esta salida, debemos estandarizar los nombres de todas las columnas con&nbsp;<code>clean_names()</code>&nbsp;y renombrar manualmente algunas columnas que son difíciles de interpretar o que están nombradas de forma diferente en el dataset de pacientes.</p>
+<p>Hay tres columnas que están codificadas de forma diferente en el dataset de pacientes y el de síntomas y hay que renombrar manualmente: <code>idPaciente</code>, <code>género</code>, <code>FTM</code>. Además, otras tres columnas se podrían modificar para hacerlas más legibles: <code>nauseasyvómitos</code>, <code>dolor de pantorrillas</code> y <code>gripal</code>.</p>
+<p>Modificando los nombres de todas estas columnas, el código de limpieza para la base de síntomas debería ser similar a este:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Limpieza base síntomas</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>sintomas_clean <span class="ot">&lt;-</span> sintomas <span class="sc">%&gt;%</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="do">### Estandariza nombres de columnas</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="fu">clean_names</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="fu">rename</span>(</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="at">sexo =</span> genero,</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="at">fecha_toma_muestra =</span> ftm,</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="at">nauseas_vomitos =</span> nauseasyvomitos,</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="at">dolor_pantorrillas =</span> dolor_de_pantorrillas,</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="at">estado_gripal =</span> gripal</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Una vez que modificamos los nombres de columnas que sea necesario, chequeamos que los cambios se hayan realizado correctamente ejecutando el comando&nbsp;<code>names(sintomas_clean)</code>&nbsp;y seguimos con la limpieza del dataset.</p>
+</section>
+<section id="detección-de-celdas-vacías-y-valores-na" class="level4">
+<h4 class="anchored" data-anchor-id="detección-de-celdas-vacías-y-valores-na">Detección de celdas vacías y valores NA</h4>
+<p>Revisaremos la estructura de las columnas con la función&nbsp;<code>glimpse()</code>&nbsp;y detectaremos la presencia de valores ausentes y duplicados con&nbsp;<code>skim()</code>.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(sintomas_clean)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 750
+Columns: 15
+$ id_paciente        &lt;chr&gt; "895db5c1", "8a7605a7", "155d5cab", "e12b7021", "63…
+$ sexo               &lt;chr&gt; "M", "F", "M", "M", "M", "M", "M", "M", "M", "M", "…
+$ fecha_toma_muestra &lt;IDate&gt; 0001-06-13, 0004-01-14, 0022-04-14, 0017-01-15, 0…
+$ fiebre             &lt;chr&gt; "Si", "No", "No", "No", "No", "Si", "Si", "Si", "Si…
+$ cefalea            &lt;chr&gt; "No", "Si", "No", "No", "No", "No", "No", "Si", "Si…
+$ mialgia            &lt;chr&gt; "No", "No", "", "No", "No", "No", "No", "Si", "No",…
+$ nauseas_vomitos    &lt;chr&gt; "Si", "Si", "No", "No", "No", "Si", "", "No", "No",…
+$ diarrea            &lt;chr&gt; "No", "No", "No", "No", "No", "No", "Si", "No", "No…
+$ malestar           &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "Si…
+$ cansancio          &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "No…
+$ hemorragia         &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "No…
+$ ictericia          &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "No…
+$ dolor_pantorrillas &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "No…
+$ estado_gripal      &lt;chr&gt; "No", "No", "No", "No", "No", "No", "No", "No", "No…
+$ mareos             &lt;chr&gt; "No", "No", "No", "No", "No", "Si", "No", "No", "No…</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">skim</span>(sintomas_clean)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Data summary</caption>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Name</td>
+<td style="text-align: left;">sintomas_clean</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Number of rows</td>
+<td style="text-align: left;">750</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Number of columns</td>
+<td style="text-align: left;">15</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">_______________________</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Column type frequency:</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">character</td>
+<td style="text-align: left;">14</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Date</td>
+<td style="text-align: left;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">________________________</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Group variables</td>
+<td style="text-align: left;">None</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: character</strong></p>
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 24%">
+<col style="width: 12%">
+<col style="width: 18%">
+<col style="width: 5%">
+<col style="width: 5%">
+<col style="width: 7%">
+<col style="width: 11%">
+<col style="width: 14%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">skim_variable</th>
+<th style="text-align: right;">n_missing</th>
+<th style="text-align: right;">complete_rate</th>
+<th style="text-align: right;">min</th>
+<th style="text-align: right;">max</th>
+<th style="text-align: right;">empty</th>
+<th style="text-align: right;">n_unique</th>
+<th style="text-align: right;">whitespace</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">id_paciente</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">750</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sexo</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">fiebre</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">cefalea</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">23</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">mialgia</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">96</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">nauseas_vomitos</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">86</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">diarrea</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">malestar</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">cansancio</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">hemorragia</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">106</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">ictericia</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">23</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">dolor_pantorrillas</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">estado_gripal</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">mareos</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: Date</strong></p>
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 22%">
+<col style="width: 11%">
+<col style="width: 16%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 10%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">skim_variable</th>
+<th style="text-align: right;">n_missing</th>
+<th style="text-align: right;">complete_rate</th>
+<th style="text-align: left;">min</th>
+<th style="text-align: left;">max</th>
+<th style="text-align: left;">median</th>
+<th style="text-align: right;">n_unique</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">fecha_toma_muestra</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">0001-01-13</td>
+<td style="text-align: left;">0031-12-15</td>
+<td style="text-align: left;">0015-05-30</td>
+<td style="text-align: right;">585</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>El contenido de las columnas <code>n_missing</code> y <code>empty</code> de la salida de la función <code>skim()</code> no coincide. Esto se debe a que en el dataset con el que estamos trabajando, los valores ausentes no se codificaron como&nbsp;<code>NA</code> sino utilizando alguna otra etiqueta (ej: 999, -999, 0000, N/A, N/D, N/S, …, —. etc.).</p>
+<p>Para investigar cómo fueron codificados los valores ausentes, podemos revisar directamente el dataset utilizando los comandos&nbsp;<code>View(sintomas_clean)</code> (R base),&nbsp;<code>view(sintomas_clean)</code> (tidyverse) o bien haciendo click sobre el nombre del objeto en el panel de Environment. Otra forma de explorar como se cargaron los valores ausentes consisitiría en hacer una tabla de frecuencias por cada variable con el comando&nbsp;<code>tabyl()</code>:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tabyl</span>(sintomas_clean, fiebre)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> fiebre   n   percent
+     No 328 0.4373333
+     Si 422 0.5626667</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tabyl</span>(sintomas_clean, mialgia)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> mialgia   n   percent
+          96 0.1280000
+      No 559 0.7453333
+      Si  95 0.1266667</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tabyl</span>(sintomas_clean, dolor_pantorrillas)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> dolor_pantorrillas   n     percent
+                 No 745 0.993333333
+                 Si   5 0.006666667</code></pre>
+</div>
+</div>
+<p>Una vez que nos aseguramos que todos los valores ausentes están codificados de la misma forma, podemos modificarlos columna por columna usando:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mutate</span>(</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="at">nombre_columna_1 =</span> <span class="fu">na_if</span>(nombre_columna_1, <span class="st">""</span>),</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="at">nombre_columna_2 =</span> <span class="fu">na_if</span>(nombre_columna_2, <span class="st">""</span>),</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="at">nombre_columna_n =</span> <span class="fu">na_if</span>(nombre_columna_n, <span class="st">""</span>)</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Donde el comando&nbsp;<code>na_if(nombre_columna, "")</code>&nbsp;del paquete&nbsp;<code>dplyr</code>&nbsp;nos permite reemplazar por&nbsp;<code>NA</code>&nbsp;los valores que especificamos entre comillas.</p>
+</section>
+<section id="modificar-múltiples-columnas-con-across" class="level4">
+<h4 class="anchored" data-anchor-id="modificar-múltiples-columnas-con-across">Modificar múltiples columnas con <code>across()</code></h4>
+<p>Repetir el proceso de modificar columna por columna puede ser tedioso si el dataset cuenta con varias columnas, para solucionar este problema&nbsp;<code>dplyr</code>&nbsp;cuenta con las funciones&nbsp;<code>across(.cols = columnas, .fns = ~ funcion())</code>&nbsp;y&nbsp;<code>where()</code>&nbsp;que usadas juntas permiten aplicar una transformación a varias columnas a la vez según una condición. Por ejemplo:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mutate</span>(</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="fu">across</span>(</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="at">.cols =</span> <span class="fu">where</span>(is.character),</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="at">.fns =</span> <span class="sc">~</span> <span class="fu">na_if</span>(.x, <span class="st">""</span>)</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>donde&nbsp;<code>where(is.character)</code>&nbsp;indica que vamos a seleccionar todas las columnas de clase caracter;&nbsp;<code>~</code>&nbsp;es el operador usado para especificar una fórmula y&nbsp;<code>.x</code>&nbsp;significa que se aplicará la transformación a todas las columnas seleccionadas. Entonces, para recodificar los&nbsp;<code>NA</code>&nbsp;en la base de síntomas podemos usar el siguiente comando:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>sintomas_clean <span class="sc">%&gt;%</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="fu">mutate</span>(</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="fu">across</span>( <span class="at">.cols =</span> <span class="fu">where</span>(is.character),</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="at">.fns =</span> <span class="sc">~</span> <span class="fu">na_if</span>(.x, <span class="st">""</span>)</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Si quisiéramos aplicar <code>where()</code> a columnas de tipo numérico, deberíamos reemplazar el argumento entre paréntesis por <code>is.numeric</code>, mientras que si nos interesara aplicar la transformación a todas las columnas del dataset, usaríamos la función <code>everything()</code> en lugar de <code>where()</code>. También podríamos seleccionar columnas específicas que contengan cierto patrón usando las funciones de selección <code>starts_with("condicion"), ends_with("condicion"), contains("condicion"), matches("condicion")</code> y otras funciones de selección que <code>dplyr</code> toma del paquete <code>tidyselect</code>. Para más información pueden visitar los siguientes links: <a href="https://dplyr.tidyverse.org/reference/across.html">across()</a>, <a href="https://dplyr.tidyverse.org/reference/dplyr_tidy_select.html">comandos tidyselect</a></p>
+</section>
+<section id="detección-de-cadenas-de-texto" class="level4">
+<h4 class="anchored" data-anchor-id="detección-de-cadenas-de-texto">Detección de cadenas de texto</h4>
+<p>Otras funciones importante para usar en combinación con <code>mutate(), select(), filter(), if_else()</code>, etc.son aquellas que permiten detectar y/o reemplazar texto.</p>
+<p>En <code>R base</code>, los comandos <code>grep(pattern, x)</code> y&nbsp;<code>grepl(pattern, x)</code> permiten detectar una expresión regular o una cadena de texto específico en un vector/columna de tipo caracter, mientras que los comandos <code>sub(pattern, replacement, x)</code> y <code>gsub(pattern, replacement, x)</code> nos permiten detectar una expresión regular y reemplazarla por otra que especificamos.</p>
+<p>En <code>tidyverse</code> el paquete <code>stringr</code> nos permite trabajar con expresiones regulares usando los comandos <code>str_detect(string, pattern), str_replace(string, pattern, replacement), str_replace_all(string, pattern, replacement)</code>, entre otros. Donde <code>string</code> es la columna o vector, <code>pattern</code> la expresión regular o texto que queremos buscar y <code>replacement</code> la expresión regular o texto con la que queremos reemplazarlo.</p>
+<p>La lista completa de comandos y sus usos puede consultarse en este link: <a href="https://stringr.tidyverse.org/">stringr</a></p>
+<p>Más información sobre trabajar con cadenas de texto y expresiones regulares en este link: <a href="https://www.epirhandbook.com/es/characters-and-strings.html">EpiRhandbook</a></p>
+<p>Para probar como se trabaja con expresiones regulares, vamos a cargar y limpiar el dataset “<strong>base_laboratorio.xlsx</strong>” que contiene los resultados de los test de laboratorio para los pacientes con sospecha clínica de leptospirosis.</p>
+<p>Luego de cargar los datos crudos, creamos un nuevo objeto para los datos limpios y repetimos los pasos aprendidos en esta clase y la anterior para:</p>
+<ol type="1">
+<li><p>Estandarizar los nombres de columna</p></li>
+<li><p>Revisar/corregir valores ausentes</p></li>
+<li><p>Corregir el formato de las fechas</p></li>
+<li><p>Crear variables para el año y semana epidemiológica de inicio de los síntomas&nbsp;</p></li>
+</ol>
+<p>Una vez completados estos pasos, vamos a ejecutar el comando&nbsp;<code>tabyl(laboratorio_clean, resultado)</code> y observar la salida del mismo. Podemos distinguir que existen varias categorías para los casos confirmados, descartados, sospechosos y probables. Nos interera crear una nueva variable llamada <code>resultado_cat</code> donde se asigne el valor “<strong>POS</strong>” si se detecta la cadena de texto “<strong>CONF</strong>” y que asigne el valor “<strong>NEG</strong>” en caso contrario.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>sintomas_clean <span class="sc">%&gt;%</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mutate</span>(<span class="at">resultado_cat =</span> <span class="fu">if_else</span>(<span class="fu">str_detect</span>(resultado,<span class="st">"CONF"</span>), <span class="st">"POS"</span>, <span class="st">"NEG"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>El script de limpieza final debería verse similar a:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Carga paquetes ----------------------------------------------------------</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  skimr,</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  rio,</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  janitor,</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>  tidyverse</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Carga datos -------------------------------------------------------------</span></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a><span class="do">### Base pacientes</span></span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>pacientes <span class="ot">&lt;-</span> <span class="fu">import</span>(<span class="st">"../raw/base_pacientes.xlsx"</span>)                                                                                       </span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a><span class="do">### Base síntomas</span></span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>sintomas <span class="ot">&lt;-</span> <span class="fu">import</span>(<span class="st">"../raw/base_sintomas.csv"</span>)</span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a><span class="do">### Base resultados</span></span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>laboratorio <span class="ot">&lt;-</span> <span class="fu">import</span>(<span class="st">"../raw/base_lab.xlsx"</span>)</span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Limpia datos pacientes --------------------------------------------------</span></span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a>pacientes_clean <span class="ot">&lt;-</span> pacientes <span class="sc">%&gt;%</span> </span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Estandariza nombres de columnas</span></span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">clean_names</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb21-26"><a href="#cb21-26" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Renombra columnas manualmente</span></span>
+<span id="cb21-27"><a href="#cb21-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">depto_residencia =</span> depto_r,</span>
+<span id="cb21-28"><a href="#cb21-28" aria-hidden="true" tabindex="-1"></a>         <span class="at">depto_muestra =</span> depto_m,</span>
+<span id="cb21-29"><a href="#cb21-29" aria-hidden="true" tabindex="-1"></a>         <span class="at">provincia_residencia =</span> provincia_resid) <span class="sc">%&gt;%</span> </span>
+<span id="cb21-30"><a href="#cb21-30" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb21-31"><a href="#cb21-31" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Filtra datos de otras provincias</span></span>
+<span id="cb21-32"><a href="#cb21-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(depto_residencia)) <span class="sc">%&gt;%</span> </span>
+<span id="cb21-33"><a href="#cb21-33" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb21-34"><a href="#cb21-34" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Filtra registros sin edad y sexo</span></span>
+<span id="cb21-35"><a href="#cb21-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(sexo) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(edad_diagnostico)) <span class="sc">%&gt;%</span> </span>
+<span id="cb21-36"><a href="#cb21-36" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb21-37"><a href="#cb21-37" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Corrige provincia</span></span>
+<span id="cb21-38"><a href="#cb21-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">provincia_residencia =</span> <span class="st">"Santa Fe"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb21-39"><a href="#cb21-39" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb21-40"><a href="#cb21-40" aria-hidden="true" tabindex="-1"></a>  <span class="do">### Cambia etiquetas sexo</span></span>
+<span id="cb21-41"><a href="#cb21-41" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">sexo =</span> <span class="fu">if_else</span>(sexo <span class="sc">==</span> <span class="st">"M"</span>, <span class="st">"masculino"</span>, <span class="st">"femenino"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb21-42"><a href="#cb21-42" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb21-43"><a href="#cb21-43" aria-hidden="true" tabindex="-1"></a>  <span class="do">### Cambia formato de fechas</span></span>
+<span id="cb21-44"><a href="#cb21-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">fecha_toma_muestra =</span> <span class="fu">dmy</span>(fecha_toma_muestra)) <span class="sc">%&gt;%</span> </span>
+<span id="cb21-45"><a href="#cb21-45" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb21-46"><a href="#cb21-46" aria-hidden="true" tabindex="-1"></a>  <span class="do">### Crea nuevas columnas</span></span>
+<span id="cb21-47"><a href="#cb21-47" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Año toma de muestra</span></span>
+<span id="cb21-48"><a href="#cb21-48" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">anio_toma_muestra =</span> <span class="fu">year</span>(fecha_toma_muestra)) <span class="sc">%&gt;%</span> </span>
+<span id="cb21-49"><a href="#cb21-49" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb21-50"><a href="#cb21-50" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Semana epidemiológica</span></span>
+<span id="cb21-51"><a href="#cb21-51" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">semana_toma_muestra =</span> <span class="fu">epiweek</span>(fecha_toma_muestra)) <span class="sc">%&gt;%</span> </span>
+<span id="cb21-52"><a href="#cb21-52" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb21-53"><a href="#cb21-53" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Edad en años</span></span>
+<span id="cb21-54"><a href="#cb21-54" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">edad_anios =</span> <span class="fu">case_when</span>(</span>
+<span id="cb21-55"><a href="#cb21-55" aria-hidden="true" tabindex="-1"></a>    tipo_edad_diagnostico<span class="sc">==</span><span class="st">"MESES"</span> <span class="sc">~</span> edad_diagnostico<span class="sc">/</span><span class="dv">12</span>,</span>
+<span id="cb21-56"><a href="#cb21-56" aria-hidden="true" tabindex="-1"></a>    grupo_edad <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"&lt;= 1 AÑO"</span>) <span class="sc">~</span> edad_diagnostico<span class="sc">/</span><span class="dv">12</span>,</span>
+<span id="cb21-57"><a href="#cb21-57" aria-hidden="true" tabindex="-1"></a>    <span class="cn">TRUE</span> <span class="sc">~</span> edad_diagnostico)) <span class="sc">%&gt;%</span> </span>
+<span id="cb21-58"><a href="#cb21-58" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb21-59"><a href="#cb21-59" aria-hidden="true" tabindex="-1"></a>  <span class="do">### Ordena columnas</span></span>
+<span id="cb21-60"><a href="#cb21-60" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(id_paciente, sexo, edad_anios, provincia_residencia, depto_residencia,</span>
+<span id="cb21-61"><a href="#cb21-61" aria-hidden="true" tabindex="-1"></a>         fecha_toma_muestra, anio_toma_muestra, semana_toma_muestra, internado) <span class="sc">%&gt;%</span> </span>
+<span id="cb21-62"><a href="#cb21-62" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb21-63"><a href="#cb21-63" aria-hidden="true" tabindex="-1"></a>  <span class="do">### Elimina duplicados</span></span>
+<span id="cb21-64"><a href="#cb21-64" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>()</span>
+<span id="cb21-65"><a href="#cb21-65" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb21-66"><a href="#cb21-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-67"><a href="#cb21-67" aria-hidden="true" tabindex="-1"></a><span class="co"># Limpia base síntomas ----------------------------------------------------</span></span>
+<span id="cb21-68"><a href="#cb21-68" aria-hidden="true" tabindex="-1"></a>sintomas_clean <span class="ot">&lt;-</span> sintomas <span class="sc">%&gt;%</span> </span>
+<span id="cb21-69"><a href="#cb21-69" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb21-70"><a href="#cb21-70" aria-hidden="true" tabindex="-1"></a>  <span class="do">### Estandariza nombres de columnas</span></span>
+<span id="cb21-71"><a href="#cb21-71" aria-hidden="true" tabindex="-1"></a>  <span class="fu">clean_names</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb21-72"><a href="#cb21-72" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb21-73"><a href="#cb21-73" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(</span>
+<span id="cb21-74"><a href="#cb21-74" aria-hidden="true" tabindex="-1"></a>    <span class="at">sexo =</span> genero,</span>
+<span id="cb21-75"><a href="#cb21-75" aria-hidden="true" tabindex="-1"></a>    <span class="at">fecha_toma_muestra =</span> ftm,</span>
+<span id="cb21-76"><a href="#cb21-76" aria-hidden="true" tabindex="-1"></a>    <span class="at">nauseas_vomitos =</span> nauseasyvomitos,</span>
+<span id="cb21-77"><a href="#cb21-77" aria-hidden="true" tabindex="-1"></a>    <span class="at">dolor_pantorrillas =</span> dolor_de_pantorrillas,</span>
+<span id="cb21-78"><a href="#cb21-78" aria-hidden="true" tabindex="-1"></a>    <span class="at">estado_gripal =</span> gripal</span>
+<span id="cb21-79"><a href="#cb21-79" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span> </span>
+<span id="cb21-80"><a href="#cb21-80" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb21-81"><a href="#cb21-81" aria-hidden="true" tabindex="-1"></a>  <span class="do">### Corrige formato fechas</span></span>
+<span id="cb21-82"><a href="#cb21-82" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">fecha_toma_muestra =</span> <span class="fu">dmy</span>(fecha_toma_muestra)) <span class="sc">%&gt;%</span> </span>
+<span id="cb21-83"><a href="#cb21-83" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb21-84"><a href="#cb21-84" aria-hidden="true" tabindex="-1"></a>  <span class="do">### Cambia etiquetas sexo</span></span>
+<span id="cb21-85"><a href="#cb21-85" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">sexo =</span> <span class="fu">if_else</span>(sexo <span class="sc">==</span> <span class="st">"M"</span>, <span class="st">"masculino"</span>, <span class="st">"femenino"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb21-86"><a href="#cb21-86" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb21-87"><a href="#cb21-87" aria-hidden="true" tabindex="-1"></a>  <span class="do">### Corrige valores faltantes</span></span>
+<span id="cb21-88"><a href="#cb21-88" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">where</span>(is.character), </span>
+<span id="cb21-89"><a href="#cb21-89" aria-hidden="true" tabindex="-1"></a>                <span class="at">.fns =</span> <span class="sc">~</span> <span class="fu">na_if</span>(.x, <span class="st">""</span>))) <span class="sc">%&gt;%</span> </span>
+<span id="cb21-90"><a href="#cb21-90" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb21-91"><a href="#cb21-91" aria-hidden="true" tabindex="-1"></a>  <span class="do">### Elimina duplicados</span></span>
+<span id="cb21-92"><a href="#cb21-92" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>()</span>
+<span id="cb21-93"><a href="#cb21-93" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb21-94"><a href="#cb21-94" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb21-95"><a href="#cb21-95" aria-hidden="true" tabindex="-1"></a><span class="co"># Limpia base resultados --------------------------------------------------</span></span>
+<span id="cb21-96"><a href="#cb21-96" aria-hidden="true" tabindex="-1"></a>laboratorio_clean <span class="ot">&lt;-</span> laboratorio <span class="sc">%&gt;%</span> </span>
+<span id="cb21-97"><a href="#cb21-97" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb21-98"><a href="#cb21-98" aria-hidden="true" tabindex="-1"></a>  <span class="do">### Estandariza nombre de columnas</span></span>
+<span id="cb21-99"><a href="#cb21-99" aria-hidden="true" tabindex="-1"></a>  <span class="fu">clean_names</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb21-100"><a href="#cb21-100" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb21-101"><a href="#cb21-101" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">id_paciente =</span> id_pte) <span class="sc">%&gt;%</span> </span>
+<span id="cb21-102"><a href="#cb21-102" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb21-103"><a href="#cb21-103" aria-hidden="true" tabindex="-1"></a>  <span class="do">### Corrige formato fechas</span></span>
+<span id="cb21-104"><a href="#cb21-104" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">fecha_inicio_sintomas =</span> <span class="fu">convert_to_date</span>(fecha_inicio_sintomas)) <span class="sc">%&gt;%</span> </span>
+<span id="cb21-105"><a href="#cb21-105" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb21-106"><a href="#cb21-106" aria-hidden="true" tabindex="-1"></a>  <span class="do">### Año inicio síntomas</span></span>
+<span id="cb21-107"><a href="#cb21-107" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">anio_inicio_sintomas =</span> <span class="fu">year</span>(fecha_inicio_sintomas)) <span class="sc">%&gt;%</span> </span>
+<span id="cb21-108"><a href="#cb21-108" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb21-109"><a href="#cb21-109" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Semana epidemiológica</span></span>
+<span id="cb21-110"><a href="#cb21-110" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">semana_inicio_sintomas =</span> <span class="fu">epiweek</span>(fecha_inicio_sintomas)) <span class="sc">%&gt;%</span> </span>
+<span id="cb21-111"><a href="#cb21-111" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb21-112"><a href="#cb21-112" aria-hidden="true" tabindex="-1"></a>  <span class="do">### Recategoriza resultado</span></span>
+<span id="cb21-113"><a href="#cb21-113" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">resultado_cat =</span> <span class="fu">if_else</span>(<span class="fu">grepl</span>(<span class="st">"CONF"</span>, resultado),</span>
+<span id="cb21-114"><a href="#cb21-114" aria-hidden="true" tabindex="-1"></a>                                 <span class="st">"POS"</span>, <span class="st">"NEG"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb21-115"><a href="#cb21-115" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb21-116"><a href="#cb21-116" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb21-117"><a href="#cb21-117" aria-hidden="true" tabindex="-1"></a>  <span class="do">### Limpia duplicados</span></span>
+<span id="cb21-118"><a href="#cb21-118" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
 </section>
 </section>
 
