@@ -1,0 +1,150 @@
+---
+title: "Clase 2: Limpieza y procesamiento de datos"
+format: html
+editor: visual
+toc: true
+toc-title: "Contenidos"
+style: "../custom.scss"
+---
+
+```{r}
+#| echo: false
+# opciones globales
+knitr::opts_chunk$set(
+  message = F,
+  warning = F,
+  fig.align = "center",
+  dpi = 300
+)
+```
+
+## Repaso Clase 1
+
+En esta clase repasaremos los siguientes contenidos de la semana anterior:
+
+-   Proyectos de RStudio
+
+-   Creación y edición de scripts
+
+-   Creación de objetos
+
+-   Uso de funciones
+
+-   Importación de datos
+
+## Datos crudos vs datos limpios
+
+![](images/curso_R_clase02.png){width="100%"}
+
+### Datos crudos (*raw data*)
+
+-   Los datos crudos, datos brutos o *raw data* son aquellos que se obtienen directamente de fuentes primarias (encuestas, test de laboratorio, aparatos de medición, etc.) o secundarias (datos de vigilancia, estaciones meteorológicas, etc.)
+
+-   No suelen estar en condiciones de ser utilizados directamente
+
+-   Algunos de los problemas más frecuentes de los datos crudos son:
+
+    -   Los encabezados de columna son valores
+
+    -   Múltiples variables en una misma columna
+
+    -   Variables almacenadas en filas y columnas
+
+    -   Múltiples unidades de observación en un mismo dataset
+
+    -   Múltiples datasets para una misma unidad de observación
+
+### Datos limpios (*tidy data*)
+
+-   La limpieza y procesamiento de los datos crudos representa más del 80% del análisis de datos
+
+-   Se requieren varias instancias de limpieza, según se vayan detectando nuevos errores y/o inconsistencias
+
+-   Los datos limpios están compuestos por una colección de valores organizados en **variables** (columnas) y **observaciones** (filas)
+
+-   Consideramos que un dataset está ordenado si:
+
+![](images/curso_R_clase02-02.png)
+
+### ¿Porqué debemos usar *tidy data*?
+
+![](images/curso_R_clase02-03.png)
+
+#### Ejemplos de datos desordenados
+
+![](images/curso_R_clase02-04.png)
+
+![](images/curso_R_clase02-05.png)
+
+![](images/curso_R_clase02-06.png)
+
+## Limpieza de datos en R
+
+### Limpieza de datos con `dplyr`
+
+-   Forma parte del ecosistema de paquetes `tidyverse`
+
+-   Permite la limpieza y procesamiento de datos mediante el uso de funciones sencillas (verbos):
+
+    -   `filter():` selecciona filas
+
+    -   `select()`: selecciona columnas
+
+    -   `mutate()`: crea nuevas columnas
+
+    -   `rename()`: modifica nombres de columnas
+
+[![](https://dplyr.tidyverse.org/logo.png){fig-align="right" width="25%"}](https://dplyr.tidyverse.org/)
+
+### Operador *pipe (*`%>%`*)*
+
+-   Es un operador que viene en el paquete `magrittr` de `tidyverse`
+
+[![](https://magrittr.tidyverse.org/logo.png){fig-align="right" width="30%"}](https://magrittr.tidyverse.org/)
+
+-   Toma la salida de una función y la pasa como primer argumento de la función siguiente
+
+-   Esto permite enlazar funciones, haciendo que el código sea más prolijo y eficiente
+
+-   Las versiones más nuevas de R incluyen el operador `|>` que funciona de forma similar
+
+```{=html}
+<!-- -->
+```
+-   Para entender su funcionamiento se puede pensar, como su nombre en inglés indica, que se trata de una cañería:
+
+![](images/1691573116796.png){fig-align="center" width="80%"}
+
+-   O bien de los pasos para realizar una receta de cocina:
+
+![](images/Pipe_baking_magrittr_backAssign.gif){fig-align="center" width="80%"}
+
+### Ejemplo práctico en R
+
+```{r}
+## Carga paquetes
+library(tidyverse)
+
+## Carga datos ejemplo
+data("starwars")
+
+# Explora datos
+glimpse(starwars)
+
+## Limpia datos con dplyr
+data_clean <- starwars %>% 
+  
+  # enlazo con pipe a la siguiente función
+  # Selecciona personajes femeninos
+  filter(sex == "female") %>% 
+  
+  # Selecciona nombre, especie, género y planeta
+  select(name, species, gender, homeworld) %>% 
+  
+  # Crea nueva variable para especie y género
+  mutate(species_gender = paste(species, gender)) 
+# Con paste() puedo unir los valores de dos o más variables
+
+# Visualizo datos limpios
+data_clean
+```
